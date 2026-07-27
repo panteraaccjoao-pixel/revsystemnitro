@@ -1,0 +1,255 @@
+<!DOCTYPE html><html lang="pt-BR" class="dark"><head><script>
+window.addEventListener("click", function(e) {
+  var a = e.target.closest("a");
+  if (a && a.href && a.href.startsWith(window.location.origin)) {
+    e.preventDefault();
+    e.stopPropagation();
+    window.location.href = a.href;
+  }
+}, true);
+</script><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="preload" href="/_next/static/media/bb3ef058b751a6ad-s.p.woff2" as="font" crossorigin="" type="font/woff2"><link rel="preload" href="/_next/static/media/e4af272ccee01ff0-s.p.woff2" as="font" crossorigin="" type="font/woff2"><link rel="preload" as="image" href="/rev_system.mp4"><link rel="stylesheet" href="/produtos/css/3c9639d6136089ec.css?v=1784665466973" data-precedence="next"><link rel="stylesheet" href="/produtos/css/9629ef235ae0e845.css?v=1784665466973" data-precedence="next"><link rel="preload" as="script" fetchpriority="low" href="/_next/static/chunks/webpack-3d871864315df098.js?v=1784665466973"><script src="/produtos/js/fd9d1056-266605b20403816f.js?v=1784665466973" async=""></script><script src="/produtos/js/2117-ac74966ea36336e6.js?v=1784665466973" async=""></script><script src="/produtos/js/main-app-be3d940aef6bd3eb.js?v=1784665466973" async=""></script><script src="/produtos/js/5569-3b0a6283386ba982.js?v=1784665466973" async=""></script><script src="/produtos/js/7765-441a6590f213bce5.js?v=1784665466973" async=""></script><script src="/produtos/js/7514-8d204b517d25edc4.js?v=1784665466973" async=""></script><script src="/produtos/js/5878-7dadfbd3910bfe66.js?v=1784665466973" async=""></script><script src="/produtos/js/1-60afebffe8039bbf.js?v=1784665466973" async=""></script><script src="/produtos/js/6008-95951be339f254a6.js?v=1784665466973" async=""></script><script src="/produtos/js/600-2568e71ab45c37b1.js?v=1784665466973" async=""></script><script src="/produtos/js/2972-e623c2665d47c5ac.js?v=1784665466973" async=""></script><script src="/produtos/js/1107-8f1b4c2d35946be5.js?v=1784665466973" async=""></script><script src="/produtos/js/3977-935c0f3bf21dc23a.js?v=1784665466973" async=""></script><script src="/produtos/js/8495-29d804e87e7bec39.js?v=1784665466973" async=""></script><script src="/produtos/js/4362-6f3bd7249b773ac0.js?v=1784665466973" async=""></script><script src="/produtos/js/5689-763dd1324d1a389f.js?v=1784665466973" async=""></script><script src="/produtos/js/app/produtos/page-c6be01703c78592c.js?v=1784665466973" async=""></script><script src="/produtos/js/app/layout-ad0769bde4b57061.js?v=1784665466973" async=""></script><script src="/produtos/js/app/not-found-ff3efed6315574ef.js?v=1784665466973" async=""></script><script src="/produtos/js/app/global-error-a1a4e1d0dcd8cb61.js?v=1784665466973" async=""></script><title>REV SYSTEM | Plataforma de Produtos Digitais</title><meta name="description" content="A plataforma perfeita para suas compras virtuais."><link rel="icon" href="../../www.REV SYSTEMty.com/rev_system.mp4" type="image/png" sizes="870x870"><link rel="apple-touch-icon" href="../../www.REV SYSTEMty.com/apple-rev_system.mp4" type="image/png" sizes="870x870"><meta name="next-size-adjust"><script src="/produtos/js/polyfills-42372ed130431b0a.js?v=1784665466973" nomodule=""></script>
+
+
+<style id="rev-system-theme">
+  /* Pure black background for main containers */
+  body, .min-h-screen, .bg-background, section, main {
+    background-color: #000000 !important;
+    background-image: none !important;
+  }
+  
+  /* Background Ambient Glow */
+  body::before {
+    content: '';
+    position: fixed;
+    top: -20%;
+    left: -10%;
+    width: 120%;
+    height: 100vh;
+    background: radial-gradient(ellipse at top, rgba(220, 38, 38, 0.25), transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  
+  /* Solid Dark Cards (Like Membros Page) */
+  .bg-card, .bg-\[\#0a0a0a\], .border-border\/40 {
+    background-color: #080808 !important; 
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5) !important;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    position: relative;
+    z-index: 10;
+  }
+  
+  /* The glow effect on hover for cards */
+  .bg-card:hover, .bg-\[\#0a0a0a\]:hover {
+    box-shadow: 0 15px 40px -10px rgba(220, 38, 38, 0.4) !important;
+    border-color: rgba(220, 38, 38, 0.5) !important;
+    transform: translateY(-4px) !important;
+  }
+  
+  /* Header without the red line */
+  header {
+    border-bottom: none !important;
+    box-shadow: none !important;
+    background-color: rgba(0, 0, 0, 0.8) !important;
+  }
+  
+  /* Subtle red glow on the videos */
+  video {
+    box-shadow: 0 0 15px rgba(220, 38, 38, 0.2) !important;
+  }
+</style>
+
+<style>
+  :root {
+    --primary: 0 84.2% 60.2%; /* Red primary */
+  }
+  .bg-primary { background-color: hsl(var(--primary)) !important; }
+  .text-primary { color: hsl(var(--primary)) !important; }
+  .border-primary { border-color: hsl(var(--primary)) !important; }
+  .fill-primary { fill: hsl(var(--primary)) !important; }
+</style>
+<script>
+    // Intercept API calls immediately before any React scripts load
+    const originalFetch = window.fetch;
+    window.fetch = async function(url, options) {
+      // Helper to map a Supabase product to Stormty format
+      const mapProduct = (p) => {
+          let numericPrice = 0;
+          if (typeof p.price === 'string') {
+             numericPrice = parseFloat(p.price.replace(/[^\d,]/g, '').replace(',', '.')) || 0;
+          } else {
+             numericPrice = p.price;
+          }
+          return {
+              _id: p.id,
+              name: p.name,
+              description: p.description || p.subtitle || "",
+              price: numericPrice,
+              banners: p.image ? [p.image] : [],
+              entrega_automatica: true,
+              pode_usar_cupom: true,
+              active: true,
+              estoque_count: p.stock
+          };
+      };
+
+      if (typeof url === 'string' && url.includes('api.stormty.com/showcase-categories')) {
+          try {
+              const resProds = await originalFetch('/api/products');
+              const prods = await resProds.json();
+              const catMap = {};
+              prods.forEach(p => {
+                  const catName = p.category || "Outros";
+                  if (!catMap[catName]) catMap[catName] = [];
+                  
+                  if (p.has_variations) {
+                      catMap[catName].push({
+                          type: "category",
+                          id: p.id,
+                          category: {
+                              _id: p.id,
+                              id: p.id,
+                              name: p.name,
+                              image: p.image || "",
+                              banner: p.image || ""
+                          }
+                      });
+                  } else {
+                      catMap[catName].push({
+                          type: "product",
+                          id: p.id,
+                          product: mapProduct(p)
+                      });
+                  }
+              });
+              const mockResponse = Object.keys(catMap).map((catName, idx) => ({
+                  id: "cat_" + idx,
+                  name: catName,
+                  description: "",
+                  index: idx,
+                  items: catMap[catName]
+              }));
+              return new Response(JSON.stringify(mockResponse), { status: 200, headers: {'Content-Type': 'application/json'} });
+          } catch(e) {
+              console.error("Fetch showcase intercept error", e);
+          }
+      }
+
+      if (typeof url === 'string' && url.match(/api\.stormty\.com\/categories\/([^\/]+)\/products/)) {
+          const match = url.match(/api\.stormty\.com\/categories\/([^\/]+)\/products/);
+          const catId = match[1];
+          try {
+              const resProds = await originalFetch('/api/products');
+              const prods = await resProds.json();
+              const parentProd = prods.find(p => p.id === catId);
+              if (parentProd && parentProd.has_variations && parentProd.variations) {
+                  const variationsArr = typeof parentProd.variations === 'string' ? JSON.parse(parentProd.variations) : parentProd.variations;
+                  
+                  const responseObj = {
+                      id: parentProd.id,
+                      name: parentProd.name,
+                      description: parentProd.description || parentProd.subtitle || "",
+                      banner: parentProd.image || "",
+                      image: parentProd.image || "",
+                      products: variationsArr.map((v, i) => {
+                          let vPrice = 0;
+                          if (typeof v.price === 'string') {
+                              vPrice = parseFloat(v.price.replace(/[^\d,]/g, '').replace(',', '.')) || 0;
+                          } else {
+                              vPrice = v.price;
+                          }
+                          return {
+                              _id: parentProd.id + "_" + i,
+                              name: v.name,
+                              description: parentProd.description || "",
+                              price: vPrice,
+                              banners: parentProd.image ? [parentProd.image] : [],
+                              entrega_automatica: true,
+                              estoque_count: v.stock || parentProd.stock
+                          };
+                      })
+                  };
+                  return new Response(JSON.stringify(responseObj), { status: 200, headers: {'Content-Type': 'application/json'} });
+              } else {
+                  return new Response(JSON.stringify({ code: "CATEGORY_NOT_FOUND" }), { status: 404, headers: {'Content-Type': 'application/json'} });
+              }
+          } catch(e) {
+              console.error("Fetch category products intercept error", e);
+          }
+      }
+      
+      if (typeof url === 'string' && url.match(/api\.stormty\.com\/products\/([^\/]+)$/)) {
+          const match = url.match(/api\.stormty\.com\/products\/([^\/]+)$/);
+          const productId = match ? match[1] : null;
+          if (productId) {
+              try {
+                  const resProds = await originalFetch('/api/products');
+                  const prods = await resProds.json();
+                  
+                  if (productId.includes('_')) {
+                      const [parentId, vIndex] = productId.split('_');
+                      const product = prods.find(p => p.id === parentId);
+                      if (product && product.has_variations && product.variations) {
+                          const variationsArr = typeof product.variations === 'string' ? JSON.parse(product.variations) : product.variations;
+                          const v = variationsArr[parseInt(vIndex)];
+                          if (v) {
+                              let vPrice = typeof v.price === 'string' ? parseFloat(v.price.replace(/[^\d,]/g, '').replace(',', '.')) || 0 : v.price;
+                              return new Response(JSON.stringify({
+                                  _id: productId,
+                                  name: v.name,
+                                  description: product.description || "",
+                                  price: vPrice,
+                                  banners: product.image ? [product.image] : [],
+                                  entrega_automatica: true,
+                                  pode_usar_cupom: true,
+                                  active: true,
+                                  estoque_count: v.stock || product.stock
+                              }), { status: 200, headers: {'Content-Type': 'application/json'} });
+                          }
+                      }
+                  } else {
+                      const product = prods.find(p => p.id === productId);
+                      if (product) {
+                          return new Response(JSON.stringify(mapProduct(product)), { status: 200, headers: {'Content-Type': 'application/json'} });
+                      }
+                  }
+                  return new Response(JSON.stringify({ code: "PRODUCT_NOT_FOUND" }), { status: 404, headers: {'Content-Type': 'application/json'} });
+              } catch(e) {
+                  console.error("Fetch product intercept error", e);
+              }
+          }
+      }
+
+      if (typeof url === 'string' && url.includes('api.stormty.com/categories/')) {
+         return new Response(JSON.stringify([]), { status: 200, headers: {'Content-Type': 'application/json'} });
+      }
+
+      return originalFetch(url, options);
+    };
+</script>
+<script>
+  window.addEventListener('load', () => {
+    // Fix logos
+    document.querySelectorAll('img[alt="REV SYSTEM"]').forEach(img => {
+      const v = document.createElement('video');
+      v.src = '/rev_system.mp4';
+      v.autoplay = true; v.loop = true; v.muted = true; v.playsInline = true;
+      v.className = img.className;
+      v.width = 32; v.height = 32;
+      img.replaceWith(v);
+    });
+  });
+</script>
+</head>
+<body class="__variable_f367f3 __variable_3c557b antialiased bg-background text-foreground"><div class="min-h-screen bg-background relative">
+<div class="fixed inset-0 bg-[radial-gradient(ellipse_at_top,rgba(220,38,38,0.15),transparent_50%)] pointer-events-none z-0"></div>
+
+<div class="fixed inset-0 bg-black pointer-events-none"></div><div class="fixed inset-0 bg-black bg-[size:4rem_4rem] opacity-[0.07] pointer-events-none"></div><div data-mobile-menu="drawer" class="fixed top-0 right-0 bottom-0 w-[85vw] max-w-[320px] bg-black z-[9999] md:hidden transform transition-transform duration-300 ease-out shadow-2xl translate-x-full" style="will-change:transform;backface-visibility:hidden"><div class="flex flex-col h-full overflow-hidden"><div class="flex items-center justify-between p-4 border-b border-white/5 flex-shrink-0"><a class="flex items-center gap-2.5" href="/"><img src="/rev_system.mp4" alt="REV SYSTEM" class="w-8 h-8 rounded-lg object-cover"><span class="text-lg font-bold text-white">REV SYSTEM</span></a><button class="w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 transition-colors" aria-label="Fechar menu"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x h-4 w-4" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></div><nav class="flex-1 overflow-y-auto overflow-x-hidden py-4 px-3 min-h-0"><a class="flex items-center gap-3 px-3 py-3 rounded-lg mb-1 transition-colors text-gray-400 hover:bg-white/5 hover:text-white" href="/"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-house h-5 w-5 flex-shrink-0" aria-hidden="true"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"></path><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg><span class="font-medium">Início</span></a><a class="flex items-center gap-3 px-3 py-3 rounded-lg mb-1 transition-colors bg-white/10 text-white" href="/produtos"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-package h-5 w-5 flex-shrink-0" aria-hidden="true"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"></path><path d="M12 22V12"></path><polyline points="3.29 7 12 12 20.71 7"></polyline><path d="m7.5 4.27 9 5.15"></path></svg><span class="font-medium">Produtos</span></a><a class="flex items-center gap-3 px-3 py-3 rounded-lg mb-1 transition-colors text-gray-400 hover:bg-white/5 hover:text-white" href="/membros"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-users h-5 w-5 flex-shrink-0" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><path d="M16 3.128a4 4 0 0 1 0 7.744"></path><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><circle cx="9" cy="7" r="4"></circle></svg><span class="font-medium">Membros</span></a><a class="flex items-center gap-3 px-3 py-3 rounded-lg mb-1 transition-colors text-gray-400 hover:bg-white/5 hover:text-white" href="/cassino"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-dice5 lucide-dice-5 h-5 w-5 flex-shrink-0" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect><path d="M16 8h.01"></path><path d="M8 8h.01"></path><path d="M8 16h.01"></path><path d="M16 16h.01"></path><path d="M12 12h.01"></path></svg><span class="font-medium">Cassino</span></a></nav><div class="p-4 border-t border-white/5 space-y-3 flex-shrink-0"><a class="block" href="/login"><button class="w-full flex items-center justify-start gap-3 text-gray-400 hover:text-white h-12 px-4 font-medium rounded-lg transition-colors"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-log-in h-5 w-5" aria-hidden="true"><path d="m10 17 5-5-5-5"></path><path d="M15 12H3"></path><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path></svg><span>Entrar</span></button></a><a class="block" href="/login?mode=register"><button class="w-full bg-primary text-white font-medium rounded-full h-12 px-6 transition-colors hover:opacity-90">Criar conta</button></a></div></div></div>
+<main class="pt-24 relative min-h-screen"></main>
+<footer class="relative py-12 border-t border-border overflow-hidden"><div class="absolute inset-0 bg-gradient-to-t from-primary/5 to-transparent"></div><div class="container mx-auto px-4 relative z-10"><div class="flex flex-col md:flex-row items-center justify-between gap-6"><div class="flex items-center gap-2"><img alt="REV SYSTEM" loading="lazy" width="32" height="32" decoding="async" data-nimg="1" class="rounded-lg object-cover" style="color:transparent" src="/rev_system.mp4"><span class="text-lg font-semibold text-foreground">REV SYSTEM</span></div><p class="text-sm text-muted-foreground">© <!-- -->2026<!-- --> REV SYSTEM. Todos os direitos reservados.</p><nav class="flex items-center gap-6"><a href="/privacidade"><span class="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer">Privacidade</span></a><a href="/termos"><span class="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer">Termos</span></a><a href="/status"><span class="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer">Status</span></a></nav></div></div></footer></div><section aria-label="Notifications alt+T" tabindex="-1" aria-live="polite" aria-relevant="additions text" aria-atomic="false"></section><script src="/produtos/js/webpack-3d871864315df098.js?v=1784665466973" async=""></script><script>(self.__next_f=self.__next_f||[]).push([0]);self.__next_f.push([2,null])</script><script>self.__next_f.push([1,"1:HL[\"/_next/static/media/bb3ef058b751a6ad-s.p.woff2\",\"font\",{\"crossOrigin\":\"\",\"type\":\"font/woff2\"}]\n2:HL[\"/_next/static/media/e4af272ccee01ff0-s.p.woff2\",\"font\",{\"crossOrigin\":\"\",\"type\":\"font/woff2\"}]\n3:HL[\"/_next/static/css/3c9639d6136089ec.css?dpl=dpl_BKvSmira47BfFQzbSGohHtaPAXyy\",\"style\"]\n4:HL[\"/_next/static/css/9629ef235ae0e845.css?dpl=dpl_BKvSmira47BfFQzbSGohHtaPAXyy\",\"style\"]\n"])</script><script>self.__next_f.push([1,"5:I[12846,[],\"\"]\n7:I[19107,[],\"ClientPageRoot\"]\n8:I[65123,[\"5569\",\"static/chunks/5569-3b0a6283386ba982.js?dpl=dpl_BKvSmira47BfFQzbSGohHtaPAXyy\",\"7765\",\"static/chunks/7765-441a6590f213bce5.js?dpl=dpl_BKvSmira47BfFQzbSGohHtaPAXyy\",\"7514\",\"static/chunks/7514-8d204b517d25edc4.js?dpl=dpl_BKvSmira47BfFQzbSGohHtaPAXyy\",\"5878\",\"static/chunks/5878-7dadfbd3910bfe66.js?dpl=dpl_BKvSmira47BfFQzbSGohHtaPAXyy\",\"1\",\"static/chunks/1-60afebffe8039bbf.js?dpl=dpl_BKvSmira47BfFQzbSGohHtaPAXyy\",\"6008\",\"static/chunks/6008-95951be339f254a6.js?dpl=dpl_BKvSmira47BfFQzbSGohHtaPAXyy\",\"600\",\"static/chunks/600-2568e71ab45c37b1.js?dpl=dpl_BKvSmira47BfFQzbSGohHtaPAXyy\",\"2972\",\"static/chunks/2972-e623c2665d47c5ac.js?dpl=dpl_BKvSmira47BfFQzbSGohHtaPAXyy\",\"1107\",\"static/chunks/1107-8f1b4c2d35946be5.js?dpl=dpl_BKvSmira47BfFQzbSGohHtaPAXyy\",\"3977\",\"static/chunks/3977-935c0f3bf21dc23a.js?dpl=dpl_BKvSmira47BfFQzbSGohHtaPAXyy\",\"8495\",\"static/chunks/8495-29d804e87e7bec39.js?dpl=dpl_BKvSmira47BfFQzbSGohHtaPAXyy\",\"4362\",\"static/chunks/4362-6f3bd7249b773ac0.js?dpl=dpl_BKvSmira47BfFQzbSGohHtaPAXyy\",\"5689\",\"static/chunks/5689-763dd1324d1a389f.js?dpl=dpl_BKvSmira47BfFQzbSGohHtaPAXyy\",\"6721\",\"static/chunks/app/produtos/page-c6be01703c78592c.js?dpl=dpl_BKvSmira47BfFQzbSGohHtaPAXyy\"],\"default\",1]\n9:I[4707,[],\"\"]\na:I[36423,[],\"\"]\nb:I[29120,[\"5569\",\"static/chunks/5569-3b0a6283386ba982.js?dpl=dpl_BKvSmira47BfFQzbSGohHtaPAXyy\",\"7765\",\"static/chunks/7765-441a6590f213bce5.js?dpl=dpl_BKvSmira47BfFQzbSGohHtaPAXyy\",\"7514\",\"static/chunks/7514-8d204b517d25edc4.js?dpl=dpl_BKvSmira47BfFQzbSGohHtaPAXyy\",\"1\",\"static/chunks/1-60afebffe8039bbf.js?dpl=dpl_BKvSmira47BfFQzbSGohHtaPAXyy\",\"4362\",\"static/chunks/4362-6f3bd7249b773ac0.js?dpl=dpl_BKvSmira47BfFQzbSGohHtaPAXyy\",\"3185\",\"static/chunks/app/layout-ad0769bde4b57061.js?dpl=dpl_BKvSmira47BfFQzbSGohHtaPAXyy\"],\"Providers\"]\nc:I[96759,[\"5569\",\"static/chunks/5569-3b0a6283386ba982.js?dpl=dpl_BKvSmira47BfFQzbSGohHtaPAXyy\",\"7765\",\"static/chunks/7765-441a6590f213bce5.js?dpl=dpl_BKvSmira47BfFQzbSGohHtaPAXyy\",\"7514\",\"static/chunks/7514-8d20"])</script><script>self.__next_f.push([1,"4b517d25edc4.js?dpl=dpl_BKvSmira47BfFQzbSGohHtaPAXyy\",\"1\",\"static/chunks/1-60afebffe8039bbf.js?dpl=dpl_BKvSmira47BfFQzbSGohHtaPAXyy\",\"4362\",\"static/chunks/4362-6f3bd7249b773ac0.js?dpl=dpl_BKvSmira47BfFQzbSGohHtaPAXyy\",\"3185\",\"static/chunks/app/layout-ad0769bde4b57061.js?dpl=dpl_BKvSmira47BfFQzbSGohHtaPAXyy\"],\"GlobalAnnouncementGate\"]\nd:I[65878,[\"5878\",\"static/chunks/5878-7dadfbd3910bfe66.js?dpl=dpl_BKvSmira47BfFQzbSGohHtaPAXyy\",\"2972\",\"static/chunks/2972-e623c2665d47c5ac.js?dpl=dpl_BKvSmira47BfFQzbSGohHtaPAXyy\",\"9160\",\"static/chunks/app/not-found-ff3efed6315574ef.js?dpl=dpl_BKvSmira47BfFQzbSGohHtaPAXyy\"],\"Image\"]\ne:I[72972,[\"5878\",\"static/chunks/5878-7dadfbd3910bfe66.js?dpl=dpl_BKvSmira47BfFQzbSGohHtaPAXyy\",\"2972\",\"static/chunks/2972-e623c2665d47c5ac.js?dpl=dpl_BKvSmira47BfFQzbSGohHtaPAXyy\",\"9160\",\"static/chunks/app/not-found-ff3efed6315574ef.js?dpl=dpl_BKvSmira47BfFQzbSGohHtaPAXyy\"],\"\"]\n10:I[21667,[\"6470\",\"static/chunks/app/global-error-a1a4e1d0dcd8cb61.js?dpl=dpl_BKvSmira47BfFQzbSGohHtaPAXyy\"],\"default\"]\n11:[]\n"])</script><script>self.__next_f.push([1,"0:[\"$\",\"$L5\",null,{\"buildId\":\"W9wlWUr7i_QiQpJBhC5sm\",\"assetPrefix\":\"\",\"urlParts\":[\"\",\"produtos\"],\"initialTree\":[\"\",{\"children\":[\"produtos\",{\"children\":[\"__PAGE__\",{}]}]},\"$undefined\",\"$undefined\",true],\"initialSeedData\":[\"\",{\"children\":[\"produtos\",{\"children\":[\"__PAGE__\",{},[[\"$L6\",[\"$\",\"$L7\",null,{\"props\":{\"params\":{},\"searchParams\":{}},\"Component\":\"$8\"}],null],null],null]},[null,[\"$\",\"$L9\",null,{\"parallelRouterKey\":\"children\",\"segmentPath\":[\"children\",\"produtos\",\"children\"],\"error\":\"$undefined\",\"errorStyles\":\"$undefined\",\"errorScripts\":\"$undefined\",\"template\":[\"$\",\"$La\",null,{}],\"templateStyles\":\"$undefined\",\"templateScripts\":\"$undefined\",\"notFound\":\"$undefined\",\"notFoundStyles\":\"$undefined\"}]],null]},[[[[\"$\",\"link\",\"0\",{\"rel\":\"stylesheet\",\"href\":\"/_next/static/css/3c9639d6136089ec.css?dpl=dpl_BKvSmira47BfFQzbSGohHtaPAXyy\",\"precedence\":\"next\",\"crossOrigin\":\"$undefined\"}],[\"$\",\"link\",\"1\",{\"rel\":\"stylesheet\",\"href\":\"/_next/static/css/9629ef235ae0e845.css?dpl=dpl_BKvSmira47BfFQzbSGohHtaPAXyy\",\"precedence\":\"next\",\"crossOrigin\":\"$undefined\"}]],[\"$\",\"html\",null,{\"lang\":\"pt-BR\",\"className\":\"dark\",\"suppressHydrationWarning\":true,\"children\":[\"$\",\"body\",null,{\"className\":\"__variable_f367f3 __variable_3c557b antialiased bg-background text-foreground\",\"suppressHydrationWarning\":true,\"children\":[\"$\",\"$Lb\",null,{\"children\":[[\"$\",\"$Lc\",null,{}],[\"$\",\"$L9\",null,{\"parallelRouterKey\":\"children\",\"segmentPath\":[\"children\"],\"error\":\"$undefined\",\"errorStyles\":\"$undefined\",\"errorScripts\":\"$undefined\",\"template\":[\"$\",\"$La\",null,{}],\"templateStyles\":\"$undefined\",\"templateScripts\":\"$undefined\",\"notFound\":[\"$\",\"div\",null,{\"className\":\"flex min-h-screen flex-col items-center justify-center bg-black px-4\",\"children\":[[\"$\",\"div\",null,{\"className\":\"relative w-64 h-64 mb-8\",\"children\":[\"$\",\"$Ld\",null,{\"src\":\"/0ff2ec9d-1ebc-4b9f-a1b5-1cd839721e3d-removebg-preview_1.webp\",\"alt\":\"Página não encontrada\",\"fill\":true,\"className\":\"object-contain\"}]}],[\"$\",\"h1\",null,{\"className\":\"text-3xl font-bold text-white\",\"children\":\"Página não encontrada\"}],[\"$\",\"p\",null,{\"className\":\"text-muted-foreground mt-2 text-center max-w-md\",\"children\":\"A página que você tentou acessar não existe ou foi movida.\"}],[\"$\",\"$Le\",null,{\"href\":\"/\",\"children\":\"Voltar ao início\",\"className\":\"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-semibold transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [\u0026_svg]:pointer-events-none [\u0026_svg]:size-4 [\u0026_svg]:shrink-0 bg-gradient-to-r from-primary to-red-500 text-primary-foreground shadow-[0_0_30px_hsl(var(--primary)/0.3)] hover:opacity-90 hover:scale-[1.02] active:scale-[0.98] h-10 px-5 py-2 mt-6\"}]]}],\"notFoundStyles\":[]}]]}]}]}]],null],null],\"couldBeIntercepted\":false,\"initialHead\":[null,\"$Lf\"],\"globalErrorComponent\":\"$10\",\"missingSlots\":\"$W11\"}]\n"])</script><script>self.__next_f.push([1,"f:[[\"$\",\"meta\",\"0\",{\"name\":\"viewport\",\"content\":\"width=device-width, initial-scale=1\"}],[\"$\",\"meta\",\"1\",{\"charSet\":\"utf-8\"}],[\"$\",\"title\",\"2\",{\"children\":\"REV SYSTEM | Plataforma de Produtos Digitais\"}],[\"$\",\"meta\",\"3\",{\"name\":\"description\",\"content\":\"A plataforma perfeita para suas compras virtuais.\"}],[\"$\",\"link\",\"4\",{\"rel\":\"icon\",\"href\":\"/icon.png?668d8eb875c95764\",\"type\":\"image/png\",\"sizes\":\"870x870\"}],[\"$\",\"link\",\"5\",{\"rel\":\"apple-touch-icon\",\"href\":\"/apple-icon.png?668d8eb875c95764\",\"type\":\"image/png\",\"sizes\":\"870x870\"}],[\"$\",\"meta\",\"6\",{\"name\":\"next-size-adjust\"}]]\n6:null\n"])</script>
+
+
+</body></html>
