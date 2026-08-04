@@ -33,6 +33,20 @@ export default function VariationClient({ product }: { product: Product }) {
   const [selectedVarIndex, setSelectedVarIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [selectedComboStreamings, setSelectedComboStreamings] = useState<string[]>(['Netflix', 'Disney +', 'Amazon Prime']);
+
+  const handleComboSelection = (name: string) => {
+    setSelectedComboStreamings(prev => {
+      if (prev.includes(name)) {
+        if (prev.length === 1) return prev;
+        return prev.filter(n => n !== name);
+      }
+      if (prev.length >= 3) {
+        return [prev[1], prev[2], name];
+      }
+      return [...prev, name];
+    });
+  };
 
   useEffect(() => {
     // Trigger entrance animations after mount
@@ -48,24 +62,41 @@ export default function VariationClient({ product }: { product: Product }) {
 
   const selectedVariation = variations[selectedVarIndex] || null;
 
-  const formatPrice = (p: string | number) => {
-    if (typeof p === 'string') {
-        const num = parseFloat(p.replace(/[^\d,]/g, '').replace(',', '.'));
-        return isNaN(num) ? '0,00' : num.toFixed(2).replace('.', ',');
-    }
-    return p.toFixed(2).replace('.', ',');
-  };
-
   const getNumericPrice = (p: string | number) => {
-    if (typeof p === 'string') {
-        return parseFloat(p.replace(/[^\d,]/g, '').replace(',', '.')) || 0;
+    if (typeof p === 'object' || p === null || p === undefined) return 0;
+    if (typeof p === 'number') return p;
+    
+    // Clean string keeping only digits, commas and dots
+    let clean = p.replace(/[^\d,.]/g, '').trim();
+    if (!clean) return 0;
+    
+    // If it has both dot and comma (e.g., 1.699,00)
+    if (clean.includes(',') && clean.includes('.')) {
+      if (clean.indexOf('.') < clean.indexOf(',')) {
+        // Dot is thousand, comma is decimal
+        clean = clean.replace(/\./g, '').replace(',', '.');
+      } else {
+        // Comma is thousand, dot is decimal
+        clean = clean.replace(/,/g, '');
+      }
+    } else if (clean.includes(',')) {
+      // Only comma present, treat as decimal separator (e.g., 16,99)
+      clean = clean.replace(',', '.');
     }
-    return p;
+    
+    const parsed = parseFloat(clean);
+    return isNaN(parsed) ? 0 : parsed;
   };
 
-  const currentPrice = selectedVariation ? formatPrice(getNumericPrice(selectedVariation.price) * quantity) : '0,00';
-  const currentStock = selectedVariation ? selectedVariation.stock : product.stock;
-  const currentPriceSingle = selectedVariation ? formatPrice(selectedVariation.price) : '0,00';
+  const formatPrice = (p: string | number) => {
+    const num = getNumericPrice(p);
+    return num.toFixed(2).replace('.', ',');
+  };
+
+  const isCombo = product.name === 'Combo Assinaturas';
+  const currentPriceSingle = isCombo ? '15,99' : (selectedVariation ? formatPrice(selectedVariation.price) : '0,00');
+  const currentPrice = isCombo ? formatPrice(15.99 * quantity) : (selectedVariation ? formatPrice(getNumericPrice(selectedVariation.price) * quantity) : '0,00');
+  const currentStock = isCombo ? 99 : (selectedVariation ? selectedVariation.stock : product.stock);
 
   const handleQtyChange = (delta: number) => {
     const newQty = quantity + delta;
@@ -124,7 +155,7 @@ export default function VariationClient({ product }: { product: Product }) {
         
         {/* Left: Giant Image Container (col-span-5) - Stagger 2 */}
         <div className={`lg:col-span-5 h-full ${isLoaded ? 'stagger-2' : 'opacity-0'}`}>
-          <div className="rounded-[2.5rem] overflow-hidden bg-white/[0.02] backdrop-blur-3xl border border-white/10 shadow-[0_20px_60px_-15px_rgba(220,38,38,0.2)] h-full min-h-[450px] relative flex items-center justify-center p-8 lg:p-16 transition-all duration-700 hover:shadow-[0_30px_80px_-15px_rgba(220,38,38,0.4)] hover:bg-white/[0.04] hover:border-red-500/30 group">
+          <div className="rounded-[2.5rem] overflow-hidden bg-white/[0.02] backdrop-blur-3xl border border-white/10 shadow-[0_20px_60px_-15px_rgba(220,38,38,0.2)] h-full min-h-[450px] relative flex flex-col items-center justify-center p-8 lg:p-12 text-center transition-all duration-700 hover:shadow-[0_30px_80px_-15px_rgba(220,38,38,0.4)] hover:bg-white/[0.04] hover:border-red-500/30 group">
             
             {/* Holographic Inner Glow */}
             <div className="absolute inset-0 bg-gradient-to-tr from-red-600/10 via-transparent to-red-400/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
@@ -132,14 +163,21 @@ export default function VariationClient({ product }: { product: Product }) {
             {/* Subtle inner highlight for the glass edge */}
             <div className="absolute inset-0 rounded-[2.5rem] pointer-events-none border border-white/10 [mask-image:linear-gradient(to_bottom,white,transparent)]"></div>
             
-            {/* Floating Image */}
-            <div className="relative w-full h-full flex items-center justify-center">
-                <div className="absolute inset-0 bg-red-600/20 blur-[80px] rounded-full scale-75 group-hover:scale-100 transition-transform duration-1000"></div>
-                <img 
-                src={product.image || "https://cdn.stormty.com/discord-uploads/1770775000597441752.png"} 
-                alt={product.name} 
-                className="w-full h-full object-contain drop-shadow-[0_20px_40px_rgba(0,0,0,0.8)] animate-float z-10"
-                />
+            {/* Pulsing Glow behind Zap */}
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(220,38,38,0.25),transparent_60%)] pointer-events-none"></div>
+            
+            {/* Floating content */}
+            <div className="relative z-10 flex flex-col items-center gap-4">
+              <div className="w-20 h-20 rounded-3xl bg-red-500/10 border border-red-500/20 flex items-center justify-center shadow-[0_0_30px_rgba(220,38,38,0.3)] animate-float mb-2">
+                <Zap className="w-10 h-10 text-red-500 animate-pulse drop-shadow-[0_0_15px_rgba(220,38,38,0.8)]" />
+              </div>
+              <h2 className="text-xl lg:text-2xl font-black text-white tracking-[0.15em] uppercase">
+                Entrega Automática
+              </h2>
+              <div className="h-px w-24 bg-gradient-to-r from-transparent via-red-500 to-transparent my-1"></div>
+              <p className="text-xs text-white/50 max-w-xs leading-relaxed font-semibold">
+                Receba seu acesso imediatamente pelo chat após a confirmação do pagamento. Sistema 100% automatizado e seguro.
+              </p>
             </div>
           </div>
         </div>
@@ -153,7 +191,7 @@ export default function VariationClient({ product }: { product: Product }) {
           </div>
 
           <h1 className="text-2xl lg:text-3xl xl:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-br from-white via-white to-white/50 mb-4 leading-tight tracking-tight whitespace-nowrap">
-            {selectedVariation ? selectedVariation.name : product.name}
+            {isCombo ? `${selectedComboStreamings.join(' + ')} (30 Dias)` : (selectedVariation ? selectedVariation.name : product.name)}
           </h1>
           
           <div className="flex items-start gap-1.5 mb-8">
@@ -161,79 +199,130 @@ export default function VariationClient({ product }: { product: Product }) {
             <span className="text-4xl lg:text-5xl font-black text-white tracking-tighter drop-shadow-[0_0_20px_rgba(255,255,255,0.2)]">{currentPriceSingle}</span>
           </div>
 
-          <div className="relative mb-4">
-            <h3 className="text-white/70 font-semibold mb-3 text-xs uppercase tracking-widest flex items-center gap-2">
-              Escolha seu pacote
-              <div className="h-px flex-1 bg-gradient-to-r from-white/10 to-transparent"></div>
-            </h3>
-            
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
-              <input 
-                type="text" 
-                placeholder="Pesquisar pacotes..." 
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full bg-white/[0.03] border border-white/10 rounded-xl pl-9 pr-4 py-3 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-red-500/50 focus:bg-white/[0.05] transition-all backdrop-blur-xl shadow-inner"
-              />
+          {/* Interactive streaming selector if it is 'Combo Assinaturas' */}
+          {product.name === 'Combo Assinaturas' ? (
+            <div className="relative mb-4">
+              <h3 className="text-white/70 font-semibold mb-3 text-xs uppercase tracking-widest flex items-center gap-2">
+                Selecione 3 Streamings
+                <div className="h-px flex-1 bg-gradient-to-r from-white/10 to-transparent"></div>
+              </h3>
+              
+              <div className="p-3 mb-4 rounded-xl bg-red-500/10 border border-red-500/20 text-xs text-red-400 font-bold tracking-wide shadow-[0_0_15px_rgba(220,38,38,0.1)]">
+                Escolha qualquer 3 plataformas de streaming abaixo por apenas R$ 15,99!
+              </div>
+
+              {/* Grid of streamings */}
+              <div className="grid grid-cols-2 gap-2 mt-3">
+                {[
+                  { name: 'Netflix', color: 'border-red-600/30 hover:border-red-600/60 bg-red-950/10', selectedColor: 'border-red-600 bg-red-600/20 text-white' },
+                  { name: 'Disney +', color: 'border-blue-600/30 hover:border-blue-600/60 bg-blue-950/10', selectedColor: 'border-blue-600 bg-blue-600/20 text-white' },
+                  { name: 'Amazon Prime', color: 'border-cyan-500/30 hover:border-cyan-500/60 bg-cyan-950/10', selectedColor: 'border-cyan-500 bg-cyan-500/20 text-white' },
+                  { name: 'Hbo Max', color: 'border-purple-600/30 hover:border-purple-600/60 bg-purple-950/10', selectedColor: 'border-purple-600 bg-purple-600/20 text-white' },
+                  { name: 'Canva Pro', color: 'border-indigo-500/30 hover:border-indigo-500/60 bg-indigo-950/10', selectedColor: 'border-indigo-500 bg-indigo-500/20 text-white' },
+                  { name: 'Crunchyroll', color: 'border-orange-500/30 hover:border-orange-500/60 bg-orange-950/10', selectedColor: 'border-orange-500 bg-orange-500/20 text-white' },
+                  { name: 'Spotify Premium', color: 'border-green-500/30 hover:border-green-500/60 bg-green-950/10', selectedColor: 'border-green-500 bg-green-500/20 text-white' },
+                  { name: 'Globo Play', color: 'border-rose-500/30 hover:border-rose-500/60 bg-rose-950/10', selectedColor: 'border-rose-500 bg-rose-500/20 text-white' },
+                  { name: 'Youtube Premium', color: 'border-red-500/30 hover:border-red-500/60 bg-red-950/10', selectedColor: 'border-red-500 bg-red-500/20 text-white' }
+                ].map(stream => {
+                  const isSelected = selectedComboStreamings.includes(stream.name);
+                  
+                  return (
+                    <button
+                      key={stream.name}
+                      type="button"
+                      onClick={() => handleComboSelection(stream.name)}
+                      className={`flex items-center justify-between p-3 rounded-xl border text-left text-xs font-bold transition-all duration-300 ${
+                        isSelected ? stream.selectedColor : `${stream.color} text-zinc-400`
+                      }`}
+                    >
+                      <span>{stream.name}</span>
+                      <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-all ${
+                        isSelected ? 'border-transparent bg-white text-black' : 'border-zinc-600 bg-transparent'
+                      }`}>
+                        {isSelected && <Check className="w-2.5 h-2.5 stroke-[4px]" />}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-          </div>
-
-          <div className="flex flex-col gap-2 overflow-y-auto max-h-[380px] px-4 -mx-4 pr-6 pb-4 custom-scrollbar">
-            {filteredVariations.map((v, idx) => {
-              const originalIndex = variations.findIndex(ov => ov.name === v.name);
-              const isSelected = selectedVarIndex === originalIndex;
-
-              return (
-                <div key={idx} className="px-1.5 py-1">
-                  <button
-                    onClick={() => {
-                      setSelectedVarIndex(originalIndex);
-                      setQuantity(1);
-                  }}
-                  className={`group relative flex items-center w-full p-3 rounded-2xl border text-left transition-all duration-300 ${
-                    isSelected 
-                      ? 'bg-white/[0.03] border-red-500/60 scale-[1.02] shadow-[0_4px_20px_rgba(220,38,38,0.1)]' 
-                      : 'bg-white/[0.02] border-white/5 hover:border-red-500/30 hover:bg-white/[0.04] hover:scale-[1.01]'
-                  }`}
-                >
-                  {isSelected && (
-                    <div className="absolute top-2.5 right-2.5">
-                      <Check className="w-3 h-3 text-red-500" />
-                    </div>
-                  )}
-
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center mr-3 shrink-0 transition-all duration-300 ${isSelected ? 'bg-red-500/20' : 'bg-white/5 group-hover:bg-red-500/10'}`}>
-                    {v.icon ? (
-                        <img src={v.icon} alt={v.name} className={`w-6 h-6 object-contain transition-transform duration-300 ${isSelected ? 'scale-110' : 'group-hover:scale-110'}`} />
-                    ) : (
-                        <Zap className={`w-5 h-5 transition-colors duration-300 ${isSelected ? 'text-red-500' : 'text-white/40 group-hover:text-red-400'}`} />
-                    )}
-                  </div>
-                  
-                  <div className="flex-1 min-w-0 z-10 pr-2">
-                    <h4 className={`text-sm font-bold truncate transition-colors duration-300 ${isSelected ? 'text-white' : 'text-white/80 group-hover:text-white'}`}>{v.name}</h4>
-                    <div className="flex items-center gap-1.5 mt-0.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
-                      <p className="text-[10px] font-medium text-white/50">{v.stock} prontas</p>
-                    </div>
-                  </div>
-                  
-                  <div className="text-right shrink-0 z-10">
-                    <span className={`text-sm font-black transition-colors duration-300 ${isSelected ? 'text-red-400' : 'text-white'}`}>R$ {formatPrice(v.price)}</span>
-                  </div>
-                  </button>
+          ) : (
+            <>
+              <div className="relative mb-4">
+                <h3 className="text-white/70 font-semibold mb-3 text-xs uppercase tracking-widest flex items-center gap-2">
+                  Escolha seu pacote
+                  <div className="h-px flex-1 bg-gradient-to-r from-white/10 to-transparent"></div>
+                </h3>
+                
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+                  <input 
+                    type="text" 
+                    placeholder="Pesquisar pacotes..." 
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="w-full bg-white/[0.03] border border-white/10 rounded-xl pl-9 pr-4 py-3 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-red-500/50 focus:bg-white/[0.05] transition-all backdrop-blur-xl shadow-inner"
+                  />
                 </div>
-              );
-            })}
-            
-            {filteredVariations.length === 0 && (
-                <div className="text-center py-6 bg-white/[0.02] rounded-2xl border border-white/5">
-                    <Search className="w-6 h-6 text-white/20 mx-auto mb-2" />
-                    <p className="text-xs font-medium text-white/50">Nenhuma variação.</p>
-                </div>
-            )}
-          </div>
+              </div>
+
+              <div className="flex flex-col gap-2 overflow-y-auto max-h-[380px] px-4 -mx-4 pr-6 pb-4 custom-scrollbar">
+                {filteredVariations.map((v, idx) => {
+                  const originalIndex = variations.findIndex(ov => ov.name === v.name);
+                  const isSelected = selectedVarIndex === originalIndex;
+
+                  return (
+                    <div key={idx} className="px-1.5 py-1">
+                      <button
+                        onClick={() => {
+                          setSelectedVarIndex(originalIndex);
+                          setQuantity(1);
+                      }}
+                      className={`group relative flex items-center w-full p-3 rounded-2xl border text-left transition-all duration-300 ${
+                        isSelected 
+                          ? 'bg-white/[0.03] border-red-500/60 scale-[1.02] shadow-[0_4px_20px_rgba(220,38,38,0.1)]' 
+                          : 'bg-white/[0.02] border-white/5 hover:border-red-500/30 hover:bg-white/[0.04] hover:scale-[1.01]'
+                      }`}
+                    >
+                      {isSelected && (
+                        <div className="absolute top-2.5 right-2.5">
+                          <Check className="w-3 h-3 text-red-500" />
+                        </div>
+                      )}
+
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center mr-3 shrink-0 transition-all duration-300 ${isSelected ? 'bg-red-500/20' : 'bg-white/5 group-hover:bg-red-500/10'}`}>
+                        {v.icon ? (
+                            <img src={v.icon} alt={v.name} className={`w-6 h-6 object-contain transition-transform duration-300 ${isSelected ? 'scale-110' : 'group-hover:scale-110'}`} />
+                        ) : (
+                            <Zap className={`w-5 h-5 transition-colors duration-300 ${isSelected ? 'text-red-500' : 'text-white/40 group-hover:text-red-400'}`} />
+                        )}
+                      </div>
+                      
+                      <div className="flex-1 min-w-0 z-10 pr-2">
+                        <h4 className={`text-sm font-bold truncate transition-colors duration-300 ${isSelected ? 'text-white' : 'text-white/80 group-hover:text-white'}`}>{v.name}</h4>
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                          <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+                          <p className="text-[10px] font-medium text-white/50">{v.stock} prontas</p>
+                        </div>
+                      </div>
+                      
+                      <div className="text-right shrink-0 z-10">
+                        <span className={`text-sm font-black transition-colors duration-300 ${isSelected ? 'text-red-400' : 'text-white'}`}>R$ {formatPrice(v.price)}</span>
+                      </div>
+                      </button>
+                    </div>
+                  );
+                })}
+                
+                {filteredVariations.length === 0 && (
+                    <div className="text-center py-6 bg-white/[0.02] rounded-2xl border border-white/5">
+                        <Search className="w-6 h-6 text-white/20 mx-auto mb-2" />
+                        <p className="text-xs font-medium text-white/50">Nenhuma variação.</p>
+                    </div>
+                )}
+              </div>
+            </>
+          )}
         </div>
 
         {/* Right: Holographic Checkout Panel (col-span-3) - Stagger 4 */}
@@ -290,13 +379,15 @@ export default function VariationClient({ product }: { product: Product }) {
             <div className="relative z-10 mt-auto">
               <button 
                 onClick={() => {
-                  const rawPrice = selectedVariation ? parseFloat(selectedVariation.price.toString().replace(',', '.')) || 0 : 0;
+                  if (isCombo && selectedComboStreamings.length < 3) return;
+                  const rawPrice = isCombo ? 15.99 : (selectedVariation ? getNumericPrice(selectedVariation.price) : 0);
+                  const varName = isCombo ? `Combo: ${selectedComboStreamings.join(' + ')}` : (selectedVariation ? selectedVariation.name : 'Padrão');
                   clearCart();
                   addToCart({
-                    id: `${product.id || 'p'}-${selectedVariation ? selectedVariation.name : product.name}`,
+                    id: `${product.id || 'p'}-${varName}`,
                     productId: product.id || 'p',
                     name: product.name,
-                    variationName: selectedVariation ? selectedVariation.name : 'Padrão',
+                    variationName: varName,
                     price: rawPrice,
                     quantity: quantity,
                     image: product.image
@@ -304,29 +395,33 @@ export default function VariationClient({ product }: { product: Product }) {
                   toggleCart(false);
                   router.push('/checkout');
                 }}
-                className="w-full relative group overflow-hidden bg-red-600 text-white font-black text-sm lg:text-base py-4 rounded-[1.25rem] transition-all duration-300 shadow-[0_10px_30px_-10px_rgba(220,38,38,0.8)] hover:shadow-[0_15px_40px_-10px_rgba(220,38,38,1)] hover:scale-[1.02] active:scale-[0.98] mb-3"
+                disabled={isCombo && selectedComboStreamings.length < 3}
+                className="w-full relative group overflow-hidden bg-red-600 text-white font-black text-sm lg:text-base py-4 rounded-[1.25rem] transition-all duration-300 shadow-[0_10px_30px_-10px_rgba(220,38,38,0.8)] hover:shadow-[0_15px_40px_-10px_rgba(220,38,38,1)] hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:shadow-none mb-3"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]"></div>
                 <span className="relative z-10 flex items-center justify-center gap-2">
-                  Comprar Agora
-                  <ChevronRight className="w-4 h-4" />
+                  {isCombo && selectedComboStreamings.length < 3 ? 'Escolha 3 Streamings' : 'Comprar Agora'}
+                  {(!isCombo || selectedComboStreamings.length >= 3) && <ChevronRight className="w-4 h-4" />}
                 </span>
               </button>
               
               <button 
                 onClick={() => {
-                  const rawPrice = selectedVariation ? parseFloat(selectedVariation.price.toString().replace(',', '.')) || 0 : 0;
+                  if (isCombo && selectedComboStreamings.length < 3) return;
+                  const rawPrice = isCombo ? 15.99 : (selectedVariation ? getNumericPrice(selectedVariation.price) : 0);
+                  const varName = isCombo ? `Combo: ${selectedComboStreamings.join(' + ')}` : (selectedVariation ? selectedVariation.name : 'Padrão');
                   addToCart({
-                    id: `${product.id || 'p'}-${selectedVariation ? selectedVariation.name : product.name}`,
+                    id: `${product.id || 'p'}-${varName}`,
                     productId: product.id || 'p',
                     name: product.name,
-                    variationName: selectedVariation ? selectedVariation.name : 'Padrão',
+                    variationName: varName,
                     price: rawPrice,
                     quantity: quantity,
                     image: product.image
                   });
                 }}
-                className="w-full bg-white/5 hover:bg-white/10 border border-white/5 text-white/80 hover:text-white font-bold py-3.5 rounded-[1.25rem] transition-all duration-300 text-xs lg:text-sm active:scale-[0.98] flex items-center justify-center gap-2"
+                disabled={isCombo && selectedComboStreamings.length < 3}
+                className="w-full bg-white/5 hover:bg-white/10 border border-white/5 text-white/80 hover:text-white font-bold py-3.5 rounded-[1.25rem] transition-all duration-300 text-xs lg:text-sm active:scale-[0.98] disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-white/5 flex items-center justify-center gap-2"
               >
                 <ShoppingBag className="w-4 h-4" />
                 Adicionar ao carrinho

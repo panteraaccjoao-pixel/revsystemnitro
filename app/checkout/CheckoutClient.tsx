@@ -2,14 +2,15 @@
 
 import React, { useState, useEffect } from 'react';
 import { useCart } from '@/lib/CartContext';
-import { Trash2, Minus, Plus, CheckCircle2, Lock, User, FileText } from 'lucide-react';
+import { Trash2, Minus, Plus, CheckCircle2, Lock, User, FileText, Zap } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export default function CheckoutClient() {
   const { items, updateQuantity, removeFromCart, cartTotal } = useCart();
   const [isLoaded, setIsLoaded] = useState(false);
   const [coupon, setCoupon] = useState('');
-  
+  const [progress, setProgress] = useState(0);
+
   // State for errors and loading
   const [error, setError] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
@@ -19,29 +20,83 @@ export default function CheckoutClient() {
     setIsLoaded(true);
   }, []);
 
+  // Animated progress bar: cycles 0→2→4→8→16→32→64→100→reset
+  useEffect(() => {
+    const steps = [0, 2, 4, 8, 16, 32, 64, 100];
+    let stepIndex = 0;
+    setProgress(steps[0]);
+
+    const advance = () => {
+      stepIndex = (stepIndex + 1) % steps.length;
+      setProgress(steps[stepIndex]);
+    };
+
+    // Jump to next step every 600ms
+    const interval = setInterval(advance, 600);
+    return () => clearInterval(interval);
+  }, []);
+
   const formatPrice = (price: number) => {
     return price.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   };
 
-  const handleCheckout = () => {
+  const handleCheckout = async () => {
     if (items.length === 0) {
       setError('Seu carrinho está vazio.');
       return;
     }
-    
+
     setIsGenerating(true);
-    
-    // Save to session storage so the PIX page can read it
-    sessionStorage.setItem('checkoutAmount', cartTotal.toString());
-    
-    // Navigate immediately — the PIX page shows "Gerando PIX..." while the API is called
-    router.push('/checkout/pix');
+    setError('');
+
+    try {
+      const res = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          payerName: 'Cliente',
+          payerDocument: '00000000000',
+          items: items.map(item => ({
+            productId: item.productId,
+            variationName: item.variationName,
+            quantity: item.quantity
+          }))
+        })
+      });
+
+      const json = await res.json();
+
+      if (!res.ok) {
+        throw new Error(json.error || 'Erro ao gerar pagamento');
+      }
+
+      // Store PIX data and amount for the PIX page to read
+      sessionStorage.setItem('checkoutAmount', cartTotal.toString());
+      sessionStorage.setItem('pixData', JSON.stringify(json.data || json));
+
+      // Only navigate after PIX is successfully generated
+      router.push('/checkout/pix');
+    } catch (err: any) {
+      setError(err.message || 'Erro ao gerar PIX. Tente novamente.');
+      setIsGenerating(false);
+    }
   };
 
   if (!isLoaded) return null;
 
   return (
     <div className="min-h-screen bg-black pt-28 pb-20 relative">
+
+      {/* ── Animated progress bar ── */}
+      <div className="fixed top-0 left-0 right-0 z-50 h-1 bg-white/10">
+        <div
+          className="h-full bg-gradient-to-r from-red-600 via-red-500/80 to-red-600/60 transition-all duration-500 ease-out shadow-lg shadow-red-500/20 relative overflow-hidden"
+          style={{ width: `${progress}%` }}
+        >
+          <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_ease-in-out_infinite] bg-gradient-to-r from-transparent via-white/30 to-transparent" />
+        </div>
+      </div>
+
       {/* Background Glow */}
       <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,rgba(220,38,38,0.15),transparent_50%)] pointer-events-none z-0"></div>
 
@@ -74,12 +129,9 @@ export default function CheckoutClient() {
                 ) : (
                   items.map((item) => (
                     <div key={item.id} className="bg-[#0a0a0c] border border-white/5 rounded-[1.5rem] p-4 flex gap-5 items-center hover:border-white/10 transition-colors">
-                      <div className="w-16 h-16 rounded-xl bg-white/5 flex items-center justify-center shrink-0">
-                        <img 
-                          src={item.image || "https://cdn.stormty.com/discord-uploads/1770775000597441752.png"} 
-                          alt={item.name} 
-                          className="w-10 h-10 object-contain"
-                        />
+                      <div className="w-16 h-16 rounded-xl bg-white/[0.02] border border-white/10 flex items-center justify-center shrink-0 relative overflow-hidden">
+                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(220,38,38,0.2),transparent_60%)] pointer-events-none"></div>
+                        <Zap className="w-6 h-6 text-red-500 animate-pulse drop-shadow-[0_0_8px_rgba(220,38,38,0.6)]" />
                       </div>
                       
                       <div className="flex-1 min-w-0">

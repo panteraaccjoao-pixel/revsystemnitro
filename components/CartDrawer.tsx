@@ -2,7 +2,7 @@
 
 import React, { useEffect } from 'react';
 import { useCart } from '@/lib/CartContext';
-import { X, Minus, Plus, ShoppingBag, Trash2, ChevronRight } from 'lucide-react';
+import { X, Minus, Plus, ShoppingBag, Trash2, ChevronRight, Zap } from 'lucide-react';
 import Link from 'next/link';
 
 export function CartDrawer() {
@@ -86,12 +86,9 @@ export function CartDrawer() {
                   {/* Subtle inner glow */}
                   <div className="absolute inset-0 bg-gradient-to-tr from-red-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
 
-                  <div className="w-20 h-20 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center overflow-hidden shrink-0">
-                    <img 
-                      src={item.image || "https://cdn.stormty.com/discord-uploads/1770775000597441752.png"} 
-                      alt={item.name} 
-                      className="w-14 h-14 object-contain drop-shadow-md group-hover:scale-110 transition-transform duration-500"
-                    />
+                  <div className="w-20 h-20 rounded-2xl bg-white/[0.02] border border-white/10 flex items-center justify-center overflow-hidden shrink-0 relative group-hover:border-red-500/40 transition-all duration-300">
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(220,38,38,0.2),transparent_60%)] pointer-events-none"></div>
+                    <Zap className="w-8 h-8 text-red-500 animate-pulse drop-shadow-[0_0_10px_rgba(220,38,38,0.6)]" />
                   </div>
                   
                   <div className="flex-1 flex flex-col min-w-0">

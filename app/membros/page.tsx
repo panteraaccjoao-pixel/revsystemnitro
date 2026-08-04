@@ -24,7 +24,7 @@ export default function Membros() {
   const footerHtml = `<footer class="relative py-12 border-t border-border overflow-hidden"><div class="absolute inset-0 bg-gradient-to-t from-primary/5 to-transparent"></div><div class="container mx-auto px-4 relative z-10"><div class="flex flex-col md:flex-row items-center justify-between gap-6"><div class="flex items-center gap-2"><img alt="REV SYSTEM" loading="lazy" width="32" height="32" decoding="async" data-nimg="1" class="rounded-lg object-cover" style="color:transparent" src="/rev_system.mp4"><span class="text-lg font-semibold text-foreground">REV SYSTEM</span></div><p class="text-sm text-muted-foreground">© <!-- -->2026<!-- --> REV SYSTEM. Todos os direitos reservados.</p><nav class="flex items-center gap-6"><a href="/privacidade"><span class="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer">Privacidade</span></a><a href="/termos"><span class="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer">Termos</span></a><a href="/status"><span class="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer">Status</span></a></nav></div></div></footer>`;
 
   return (
-    <div className="min-h-screen bg-background relative">
+    <div className="min-h-screen bg-black relative">
       
     <main className="pt-24 pb-16 relative">
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/10 rounded-full blur-[120px] pointer-events-none"></div>
