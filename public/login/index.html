@@ -91,7 +91,38 @@
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.querySelector('form');
+    
+    // Ler chave do Google reCAPTCHA via query parameters do iframe
+    const urlParams = new URLSearchParams(window.location.search);
+    const recaptchaKey = urlParams.get('recaptchaKey');
+
     if (form) {
+        // Se a chave estiver presente, ativa o reCAPTCHA v2 no formulário
+        if (recaptchaKey && recaptchaKey.trim() !== '') {
+            // 1. Injetar Script do Google reCAPTCHA v2
+            const script = document.createElement('script');
+            script.src = 'https://www.google.com/recaptcha/api.js';
+            script.async = true;
+            script.defer = true;
+            document.head.appendChild(script);
+
+            // 2. Injetar Widget no formulário (antes do botão de entrar)
+            const recaptchaDiv = document.createElement('div');
+            recaptchaDiv.className = 'g-recaptcha';
+            recaptchaDiv.setAttribute('data-sitekey', recaptchaKey);
+            recaptchaDiv.setAttribute('data-theme', 'dark');
+            recaptchaDiv.style.marginBottom = '16px';
+            recaptchaDiv.style.display = 'flex';
+            recaptchaDiv.style.justifyContent = 'center';
+
+            const submitBtn = form.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                form.insertBefore(recaptchaDiv, submitBtn);
+            } else {
+                form.appendChild(recaptchaDiv);
+            }
+        }
+
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             const emailInput = form.querySelector('input[type="email"], input[name="email"]');
@@ -102,7 +133,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const email = emailInput.value;
             const password = passInput.value;
             
-            // Check if it's registration based on URL
+            // Coletar token do Google reCAPTCHA
+            const captchaToken = form.querySelector('[name="g-recaptcha-response"]')?.value || '';
+            
             const isRegister = window.location.search.includes('mode=register');
             const endpoint = isRegister ? '/api/register' : '/api/login';
             
@@ -110,12 +143,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 const res = await fetch(endpoint, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password })
+                    body: JSON.stringify({ email, password, captchaToken })
                 });
                 
                 const data = await res.json();
                 if (res.ok) {
-                    window.location.href = '/membros';
+                    window.location.href = '/produtos';
                 } else {
                     alert(data.error || 'Erro na autenticação');
                 }

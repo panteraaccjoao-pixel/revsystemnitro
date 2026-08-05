@@ -88,9 +88,45 @@
 
 
 
+<!-- Modal de OTP com Visual Premium REV SYSTEM -->
+<div id="otp-modal" style="display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(12px); align-items: center; justify-content: center; padding: 20px;">
+  <div style="background: #070708; border: 1px solid rgba(239, 68, 68, 0.35); box-shadow: 0 0 40px rgba(239, 68, 68, 0.15); border-radius: 20px; max-width: 380px; width: 100%; padding: 30px; text-align: center; position: relative;">
+    <button id="close-otp" style="position: absolute; top: 15px; right: 15px; background: none; border: none; color: #71717a; font-size: 24px; cursor: pointer; line-height: 1; transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#71717a'">×</button>
+    <div style="width: 48px; height: 48px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 18v3c0 .6.4 1 1 1h4v-3h3v-3h2l1.4-1.4c.5-.5.6-1.2.3-1.8l-.9-1.8a8.3 8.3 0 1 0-8.6 8.6L5 20H2v-2Z"/><circle cx="16" cy="8" r="2"/></svg>
+    </div>
+    <h3 style="color: #fff; font-size: 19px; font-weight: 800; margin: 0 0 8px; letter-spacing: 0.5px;">Confirmar E-mail</h3>
+    <p style="color: #a1a1aa; font-size: 13px; margin: 0 0 24px; line-height: 1.5;" id="otp-desc">Digite o código de 6 dígitos enviado para o seu e-mail.</p>
+    
+    <div style="margin-bottom: 20px;">
+      <input id="otp-input" type="text" maxlength="6" placeholder="000000" style="width: 100%; background: #0f0f11; border: 1px solid #27272a; border-radius: 12px; padding: 14px; color: #fff; font-size: 24px; font-weight: 900; text-align: center; letter-spacing: 8px; font-family: monospace; outline: none; transition: border-color 0.2s;" onfocus="this.style.borderColor='#ef4444'" onblur="this.style.borderColor='#27272a'" />
+      <div id="otp-error" style="color: #ef4444; font-size: 12px; font-weight: 600; margin-top: 8px; text-align: center; display: none;"></div>
+    </div>
+    
+    <button id="btn-confirm-otp" style="width: 100%; padding: 14px; background: #ef4444; color: #fff; border: none; border-radius: 12px; font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; transition: opacity 0.2s; box-shadow: 0 0 15px rgba(239, 68, 68, 0.3);" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">Confirmar Cadastro</button>
+  </div>
+</div>
+
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.querySelector('form');
+    const otpModal = document.getElementById('otp-modal');
+    const otpInput = document.getElementById('otp-input');
+    const otpError = document.getElementById('otp-error');
+    const otpDesc = document.getElementById('otp-desc');
+    const btnConfirmOtp = document.getElementById('btn-confirm-otp');
+    const closeOtp = document.getElementById('close-otp');
+
+    let currentEmail = '';
+    let currentPassword = '';
+    let currentToken = '';
+
+    if (closeOtp) {
+        closeOtp.addEventListener('click', () => {
+            otpModal.style.display = 'none';
+        });
+    }
+
     if (form) {
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -102,25 +138,116 @@ document.addEventListener('DOMContentLoaded', () => {
             const email = emailInput.value;
             const password = passInput.value;
             
-            // Check if it's registration based on URL
             const isRegister = window.location.search.includes('mode=register');
-            const endpoint = isRegister ? '/api/register' : '/api/login';
             
+            if (isRegister) {
+                // Fluxo de Cadastro com Código OTP
+                try {
+                    const res = await fetch('/api/register', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, password })
+                    });
+                    
+                    const data = await res.json();
+                    
+                    if (res.ok && data.otpRequired) {
+                        // Armazena credenciais e token assinado temporariamente
+                        currentEmail = email;
+                        currentPassword = password;
+                        currentToken = data.token;
+                        
+                        // Abre a modal de verificação
+                        otpDesc.innerText = `Digite o código de 6 dígitos que enviamos para ${email}`;
+                        otpInput.value = '';
+                        otpError.style.display = 'none';
+                        otpModal.style.display = 'flex';
+                    } else {
+                        alert(data.error || 'Erro ao iniciar cadastro');
+                    }
+                } catch (err) {
+                    alert('Erro de conexão');
+                }
+            } else {
+                // Fluxo de Login Convencional (Direto)
+                try {
+                    const res = await fetch('/api/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, password })
+                    });
+                    
+                    const data = await res.json();
+                    if (res.ok) {
+                        window.location.href = '/produtos';
+                    } else {
+                        alert(data.error || 'Erro no login');
+                    }
+                } catch (err) {
+                    alert('Erro de conexão');
+                }
+            }
+        });
+    }
+
+    // Confirmação do Código OTP inserido pelo usuário
+    if (btnConfirmOtp) {
+        btnConfirmOtp.addEventListener('click', async () => {
+            const code = otpInput.value.trim();
+            if (code.length !== 6) {
+                otpError.innerText = 'Digite um código válido de 6 dígitos.';
+                otpError.style.display = 'block';
+                return;
+            }
+
+            btnConfirmOtp.innerText = 'Verificando...';
+            btnConfirmOtp.disabled = true;
+            otpError.style.display = 'none';
+
             try {
-                const res = await fetch(endpoint, {
+                const res = await fetch('/api/register/confirm', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password })
+                    body: JSON.stringify({
+                        email: currentEmail,
+                        password: currentPassword,
+                        code,
+                        token: currentToken
+                    })
                 });
-                
+
                 const data = await res.json();
-                if (res.ok) {
-                    window.location.href = '/membros';
+
+                if (res.ok && data.success) {
+                    // Login automático silencioso pós-cadastro
+                    try {
+                        const loginRes = await fetch('/api/login', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ email: currentEmail, password: currentPassword })
+                        });
+                        if (loginRes.ok) {
+                            otpModal.style.display = 'none';
+                            window.location.href = '/produtos';
+                            return;
+                        }
+                    } catch (loginErr) {
+                        console.error('Erro no login automático:', loginErr);
+                    }
+                    
+                    // Fallback se o login automático falhar
+                    otpModal.style.display = 'none';
+                    window.location.href = '/login?registered=true';
                 } else {
-                    alert(data.error || 'Erro na autenticação');
+                    otpError.innerText = data.error || 'Código inválido ou expirado.';
+                    otpError.style.display = 'block';
                 }
             } catch (err) {
-                alert('Erro de conexão');
+                otpError.innerText = 'Erro ao conectar ao servidor.';
+                otpError.style.display = 'block';
+            } finally {
+                btnConfirmOtp.innerText = 'Confirmar Cadastro';
+                btnConfirmOtp.disabled = false;
             }
         });
     }
