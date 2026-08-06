@@ -55,12 +55,12 @@ export async function POST(req: Request) {
 
     // 3. Enviar e-mail com o código OTP via Resend (100% controlado por nós)
     const resend = new Resend(process.env.RESEND_API_KEY);
-
-    await resend.emails.send({
-      from: 'REV SYSTEM <onboarding@resend.dev>',
-      to: email,
-      subject: `${code} é o seu código de confirmação REV SYSTEM ⚡`,
-      html: `
+    try {
+      await resend.emails.send({
+        from: 'REV SYSTEM <noreply@revsystemcc.com>',
+        to: email,
+        subject: `${code} é o seu código de confirmação REV SYSTEM ⚡`,
+        html: `
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #030303; color: #ffffff; padding: 40px 20px; max-width: 550px; margin: 0 auto; border-radius: 24px; border: 1px solid #220505; box-shadow: 0 20px 50px rgba(230,0,0,0.08);">
           <div style="text-align: center; margin-bottom: 30px;">
             <div style="display: inline-block; padding: 8px 16px; background-color: rgba(230, 0, 0, 0.08); border: 1px solid rgba(230, 0, 0, 0.2); border-radius: 12px; margin-bottom: 15px;">
