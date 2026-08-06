@@ -1,198 +1,194 @@
-"use client";
-import { useState, useEffect, useRef } from "react";
-import { Droplet, Eye, EyeOff } from "lucide-react";
+"use client"
+
+import { useState, useRef, useEffect } from "react"
+import Link from "next/link"
+import { ArrowLeft, Eye, EyeOff } from "lucide-react"
+
+type Step = "form" | "verify"
 
 declare global {
   interface Window {
-    grecaptcha: any;
-    onRecaptchaLoadLogin: () => void;
+    grecaptcha: any
+    onRecaptchaReadyLogin: () => void
   }
 }
 
-export default function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [mounted, setMounted] = useState(false);
+export default function LoginPage() {
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [showPassword, setShowPassword] = useState(false)
+  const [error, setError] = useState("")
+  const [loading, setLoading] = useState(false)
 
-  const recaptchaRef = useRef<HTMLDivElement>(null);
-  const widgetIdRef = useRef<number | null>(null);
+  const recaptchaRef = useRef<HTMLDivElement>(null)
+  const widgetIdRef = useRef<number | null>(null)
 
   useEffect(() => {
-    setMounted(true);
-
-    // Carregar script do Google reCAPTCHA v2
-    if (!document.getElementById("recaptcha-script-login")) {
-      window.onRecaptchaLoadLogin = () => {
-        if (recaptchaRef.current && widgetIdRef.current === null) {
-          try {
-            widgetIdRef.current = window.grecaptcha.render(recaptchaRef.current, {
-              sitekey: process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || "6Ld_e7AqAAAAAHQvS46C_x1G2QhZ04Q7dZt0y_9e",
-              theme: "dark",
-            });
-          } catch (e) {
-            console.error("Erro ao renderizar reCAPTCHA:", e);
-          }
-        }
-      };
-      const script = document.createElement("script");
-      script.id = "recaptcha-script-login";
-      script.src = "https://www.google.com/recaptcha/api.js?onload=onRecaptchaLoadLogin&render=explicit";
-      script.async = true;
-      script.defer = true;
-      document.head.appendChild(script);
-    } else if (window.grecaptcha && recaptchaRef.current && widgetIdRef.current === null) {
-      try {
-        widgetIdRef.current = window.grecaptcha.render(recaptchaRef.current, {
-          sitekey: process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || "6Ld_e7AqAAAAAHQvS46C_x1G2QhZ04Q7dZt0y_9e",
-          theme: "dark",
-        });
-      } catch (e) {
-        console.error("Erro ao renderizar reCAPTCHA:", e);
+    const renderWidget = () => {
+      if (recaptchaRef.current && widgetIdRef.current === null && window.grecaptcha) {
+        try {
+          widgetIdRef.current = window.grecaptcha.render(recaptchaRef.current, {
+            sitekey: process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || "",
+            theme: "dark",
+          })
+        } catch {}
       }
     }
-  }, []);
+
+    if (!document.getElementById("rc-script-login")) {
+      window.onRecaptchaReadyLogin = renderWidget
+      const s = document.createElement("script")
+      s.id = "rc-script-login"
+      s.src = "https://www.google.com/recaptcha/api.js?onload=onRecaptchaReadyLogin&render=explicit"
+      s.async = true
+      s.defer = true
+      document.head.appendChild(s)
+    } else {
+      renderWidget()
+    }
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
+    e.preventDefault()
+    setError("")
 
-    // Verificar Captcha
-    let captchaToken = "";
-    if (window.grecaptcha && widgetIdRef.current !== null) {
-      captchaToken = window.grecaptcha.getResponse(widgetIdRef.current);
-    }
+    const captchaToken =
+      window.grecaptcha && widgetIdRef.current !== null
+        ? window.grecaptcha.getResponse(widgetIdRef.current)
+        : ""
+
     if (!captchaToken) {
-      setError("Por favor, valide o captcha de segurança (Não sou um robô).");
-      setLoading(false);
-      return;
+      setError("Por favor, marque o captcha (Não sou um robô).")
+      return
     }
 
+    setLoading(true)
     try {
       const res = await fetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: email.trim().toLowerCase(), password, captchaToken }),
-      });
-      const data = await res.json();
-      if (!res.ok || data.error) {
-        setError(data.error || "Erro ao fazer login. Tente novamente.");
-        if (window.grecaptcha && widgetIdRef.current !== null) {
-          window.grecaptcha.reset(widgetIdRef.current);
-        }
-      } else {
-        // Armazenar sessão
-        if (data.session?.access_token) {
-          localStorage.setItem("sb-access-token", data.session.access_token);
-          localStorage.setItem("sb-refresh-token", data.session.refresh_token || "");
-        }
-        window.location.href = "/produtos";
-      }
-    } catch {
-      setError("Erro de conexão. Tente novamente.");
-    } finally {
-      setLoading(false);
-    }
-  };
+      })
+      const result = await res.json()
 
-  if (!mounted) return null;
+      if (!res.ok || result.error) {
+        setError(result.error || "E-mail ou senha incorretos.")
+        if (window.grecaptcha && widgetIdRef.current !== null) {
+          window.grecaptcha.reset(widgetIdRef.current)
+        }
+        return
+      }
+
+      window.location.href = "/produtos"
+    } catch {
+      setError("Erro ao fazer login. Tente novamente.")
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
-    <div className="min-h-screen bg-[#050505] bg-[radial-gradient(circle_at_50%_0%,rgba(220,38,38,0.15),transparent_50%)] bg-no-repeat flex flex-col items-center justify-center p-4">
-      {/* Botão voltar */}
-      <button
-        onClick={() => (window.location.href = "/")}
-        className="fixed top-6 right-6 flex items-center justify-center w-11 h-11 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 transition-all duration-300 hover:scale-105 active:scale-95"
-      >
-        <Droplet className="w-5 h-5 text-red-500 fill-red-500" />
-      </button>
+    <div className="flex min-h-screen flex-col bg-background">
+      <div className="p-4">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Voltar
+        </Link>
+      </div>
 
-      <div className="w-full max-w-[420px] space-y-6">
-        {/* Logo superior */}
-        <div className="flex flex-col items-center text-center space-y-2">
-          <div className="flex items-center gap-2">
-            <Droplet className="w-8 h-8 text-red-500 fill-red-500" />
-            <span className="text-2xl font-black text-white tracking-wider uppercase">REV SYSTEM</span>
+      <main className="flex flex-1 items-center justify-center px-4 pb-16">
+        <div className="w-full max-w-md space-y-8">
+          <div className="text-center">
+            <h1 className="text-3xl font-bold tracking-tight text-foreground md:text-4xl">
+              Entre na sua conta
+            </h1>
+            <p className="mt-2 text-muted-foreground">
+              Digite seu email e senha para acessar o REV SYSTEM
+            </p>
           </div>
-          <p className="text-sm text-zinc-400">Insira suas credenciais para entrar na plataforma</p>
-        </div>
 
-        {/* Card Form */}
-        <div className="bg-[#0b0b0d]/70 border border-white/[0.05] rounded-3xl p-8 backdrop-blur-xl shadow-[0_0_50px_rgba(0,0,0,0.5)]">
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Campo E-mail */}
-            <div className="space-y-2">
-              <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider block">E-mail</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                placeholder="seu@email.com"
-                className="w-full h-12 px-4 rounded-xl bg-[#111113] border border-white/[0.07] text-white text-sm outline-none transition-all duration-200 placeholder:text-zinc-600 focus:border-red-500/50 focus:ring-1 focus:ring-red-500/30"
-              />
-            </div>
-
-            {/* Campo Senha */}
-            <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider block">Senha</label>
-              </div>
-              <div className="relative">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  placeholder="••••••••"
-                  className="w-full h-12 pl-4 pr-12 rounded-xl bg-[#111113] border border-white/[0.07] text-white text-sm outline-none transition-all duration-200 placeholder:text-zinc-600 focus:border-red-500/50 focus:ring-1 focus:ring-red-500/30"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white transition-colors"
-                >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                </button>
-              </div>
-            </div>
-
-            {/* Google reCAPTCHA v2 */}
-            <div className="flex justify-center py-2">
-              <div ref={recaptchaRef} />
-            </div>
-
-            {/* Caixa de Erro */}
+          <form onSubmit={handleSubmit} className="space-y-6" suppressHydrationWarning>
             {error && (
-              <div className="bg-red-500/10 border border-red-500/20 text-red-500 text-sm rounded-xl px-4 py-3 leading-relaxed">
+              <div className="rounded-lg border border-red-500/50 bg-red-500/10 px-4 py-3 text-sm text-red-500">
                 {error}
               </div>
             )}
 
-            {/* Botão Submit */}
+            {/* Email */}
+            <div className="space-y-2">
+              <label htmlFor="email" className="text-sm font-medium leading-none text-foreground">
+                Email
+              </label>
+              <input
+                id="email"
+                type="email"
+                placeholder="seu@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="flex h-12 w-full rounded-lg border border-border bg-secondary px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              />
+            </div>
+
+            {/* Senha */}
+            <div className="space-y-2">
+              <label htmlFor="password" className="text-sm font-medium leading-none text-foreground">
+                Senha
+              </label>
+              <div className="relative">
+                <input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className="flex h-12 w-full rounded-lg border border-border bg-secondary px-4 py-2 pr-12 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                />
+                <button
+                  type="button"
+                  aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-1 top-1/2 z-10 -translate-y-1/2 flex h-10 w-10 items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5 pointer-events-none" />
+                  ) : (
+                    <Eye className="h-5 w-5 pointer-events-none" />
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* reCAPTCHA */}
+            <div className="flex justify-center">
+              <div ref={recaptchaRef} />
+            </div>
+
+            {/* Botão */}
             <button
               type="submit"
               disabled={loading}
-              className="w-full h-12 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 text-white font-bold text-sm rounded-xl shadow-[0_0_30px_rgba(220,38,38,0.25)] transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="inline-flex h-12 w-full items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-semibold transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-gradient-to-r from-primary to-orange-400 text-primary-foreground shadow-[0_0_30px_hsl(var(--primary)/0.3)] hover:opacity-90 hover:scale-[1.02] active:scale-[0.98]"
             >
               {loading ? "Entrando..." : "Entrar"}
             </button>
           </form>
 
-          {/* Switch Register */}
-          <div className="text-center mt-6">
-            <p className="text-xs text-zinc-500">
-              Não possui uma conta?{" "}
-              <a href="/cadastro" className="text-red-500 hover:text-red-400 font-bold transition-colors">
-                Cadastre-se
-              </a>
-            </p>
-          </div>
+          <p className="text-center text-sm text-muted-foreground">
+            Não tem uma conta?{" "}
+            <Link
+              href="/cadastro"
+              className="text-foreground underline underline-offset-2 hover:text-foreground/80"
+            >
+              Criar conta
+            </Link>
+          </p>
         </div>
-      </div>
+      </main>
     </div>
-  );
+  )
 }
