@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
-import { Droplet, ArrowRight, Mail, Lock } from "lucide-react";
+import { Droplet, Eye, EyeOff } from "lucide-react";
 
 declare global {
   interface Window {
@@ -12,6 +12,7 @@ declare global {
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [mounted, setMounted] = useState(false);
@@ -28,7 +29,7 @@ export default function Login() {
         if (recaptchaRef.current && widgetIdRef.current === null) {
           try {
             widgetIdRef.current = window.grecaptcha.render(recaptchaRef.current, {
-              sitekey: process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || "6Ld_e7AqAAAAAHQvS46C_x1G2QhZ04Q7dZt0y_9e", // Usa sitekey padrão se ausente
+              sitekey: process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || "6Ld_e7AqAAAAAHQvS46C_x1G2QhZ04Q7dZt0y_9e",
               theme: "dark",
             });
           } catch (e) {
@@ -74,7 +75,7 @@ export default function Login() {
       const res = await fetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, captchaToken }),
+        body: JSON.stringify({ email: email.trim().toLowerCase(), password, captchaToken }),
       });
       const data = await res.json();
       if (!res.ok || data.error) {
@@ -99,192 +100,97 @@ export default function Login() {
 
   if (!mounted) return null;
 
-  const inputStyle: React.CSSProperties = {
-    width: "100%",
-    padding: "12px 14px 12px 40px",
-    background: "#0d0d0f",
-    border: "1px solid rgba(255,255,255,0.06)",
-    borderRadius: "12px",
-    color: "#fff",
-    fontSize: "14px",
-    outline: "none",
-    boxSizing: "border-box",
-    transition: "all 0.2s",
-  };
-
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        backgroundColor: "#050505",
-        backgroundImage: "radial-gradient(circle at 50% 0%, rgba(220, 38, 38, 0.12), transparent 55%)",
-        backgroundAttachment: "fixed",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-        padding: "20px",
-      }}
-    >
-      {/* Back button */}
+    <div className="min-h-screen bg-[#050505] bg-[radial-gradient(circle_at_50%_0%,rgba(220,38,38,0.15),transparent_50%)] bg-no-repeat flex flex-col items-center justify-center p-4">
+      {/* Botão voltar */}
       <button
         onClick={() => (window.location.href = "/")}
-        style={{
-          position: "fixed",
-          top: "24px",
-          right: "24px",
-          zIndex: 50,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          width: "44px",
-          height: "44px",
-          borderRadius: "50%",
-          background: "rgba(255,255,255,0.04)",
-          backdropFilter: "blur(12px)",
-          border: "1px solid rgba(255,255,255,0.08)",
-          cursor: "pointer",
-          transition: "all 0.3s",
-        }}
-        onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.08)")}
-        onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.04)")}
+        className="fixed top-6 right-6 flex items-center justify-center w-11 h-11 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 transition-all duration-300 hover:scale-105 active:scale-95"
       >
-        <Droplet style={{ width: "20px", height: "20px", color: "#ef4444", fill: "#ef4444" }} />
+        <Droplet className="w-5 h-5 text-red-500 fill-red-500" />
       </button>
 
-      <div style={{ width: "100%", maxWidth: "420px" }}>
-        {/* Header */}
-        <div style={{ textAlign: "center", marginBottom: "32px" }}>
-          <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", marginBottom: "16px" }}>
-            <Droplet style={{ width: "32px", height: "32px", color: "#ef4444", fill: "#ef4444" }} />
-            <span style={{ fontSize: "24px", fontWeight: 900, color: "#fff", letterSpacing: "1px" }}>REV SYSTEM</span>
+      <div className="w-full max-w-[420px] space-y-6">
+        {/* Logo superior */}
+        <div className="flex flex-col items-center text-center space-y-2">
+          <div className="flex items-center gap-2">
+            <Droplet className="w-8 h-8 text-red-500 fill-red-500" />
+            <span className="text-2xl font-black text-white tracking-wider uppercase">REV SYSTEM</span>
           </div>
-          <p style={{ color: "#a1a1aa", fontSize: "14px", margin: 0 }}>
-            Insira suas credenciais para entrar na plataforma
-          </p>
+          <p className="text-sm text-zinc-400">Insira suas credenciais para entrar na plataforma</p>
         </div>
 
         {/* Card Form */}
-        <div
-          style={{
-            background: "rgba(10,10,12,0.75)",
-            border: "1px solid rgba(255,255,255,0.05)",
-            borderRadius: "24px",
-            padding: "36px",
-            backdropFilter: "blur(24px)",
-            boxShadow: "0 25px 60px rgba(0,0,0,0.6)",
-          }}
-        >
-          <form onSubmit={handleSubmit}>
-            {/* E-mail */}
-            <div style={{ marginBottom: "18px" }}>
-              <label style={{ display: "block", color: "#a1a1aa", fontSize: "13px", marginBottom: "6px", fontWeight: 500 }}>
-                E-mail
-              </label>
-              <div style={{ position: "relative" }}>
-                <Mail style={{ position: "absolute", left: "14px", top: "13px", width: "16px", height: "16px", color: "#71717a" }} />
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  placeholder="seu@email.com"
-                  style={inputStyle}
-                  onFocus={(e) => {
-                    e.target.style.borderColor = "rgba(239,68,68,0.4)";
-                    e.target.style.boxShadow = "0 0 15px rgba(239,68,68,0.1)";
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.borderColor = "rgba(255,255,255,0.06)";
-                    e.target.style.boxShadow = "none";
-                  }}
-                />
-              </div>
+        <div className="bg-[#0b0b0d]/70 border border-white/[0.05] rounded-3xl p-8 backdrop-blur-xl shadow-[0_0_50px_rgba(0,0,0,0.5)]">
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Campo E-mail */}
+            <div className="space-y-2">
+              <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider block">E-mail</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                placeholder="seu@email.com"
+                className="w-full h-12 px-4 rounded-xl bg-[#111113] border border-white/[0.07] text-white text-sm outline-none transition-all duration-200 placeholder:text-zinc-600 focus:border-red-500/50 focus:ring-1 focus:ring-red-500/30"
+              />
             </div>
 
-            {/* Password */}
-            <div style={{ marginBottom: "22px" }}>
-              <label style={{ display: "block", color: "#a1a1aa", fontSize: "13px", marginBottom: "6px", fontWeight: 500 }}>
-                Senha
-              </label>
-              <div style={{ position: "relative" }}>
-                <Lock style={{ position: "absolute", left: "14px", top: "13px", width: "16px", height: "16px", color: "#71717a" }} />
+            {/* Campo Senha */}
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider block">Senha</label>
+              </div>
+              <div className="relative">
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  placeholder="Sua senha de acesso"
-                  style={inputStyle}
-                  onFocus={(e) => {
-                    e.target.style.borderColor = "rgba(239,68,68,0.4)";
-                    e.target.style.boxShadow = "0 0 15px rgba(239,68,68,0.1)";
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.borderColor = "rgba(255,255,255,0.06)";
-                    e.target.style.boxShadow = "none";
-                  }}
+                  placeholder="••••••••"
+                  className="w-full h-12 pl-4 pr-12 rounded-xl bg-[#111113] border border-white/[0.07] text-white text-sm outline-none transition-all duration-200 placeholder:text-zinc-600 focus:border-red-500/50 focus:ring-1 focus:ring-red-500/30"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white transition-colors"
+                >
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
               </div>
             </div>
 
-            {/* Google reCAPTCHA v2 Widget */}
-            <div style={{ display: "flex", justifyContent: "center", marginBottom: "24px" }}>
+            {/* Google reCAPTCHA v2 */}
+            <div className="flex justify-center py-2">
               <div ref={recaptchaRef} />
             </div>
 
-            {/* Error Box */}
+            {/* Caixa de Erro */}
             {error && (
-              <div
-                style={{
-                  background: "rgba(239,68,68,0.08)",
-                  border: "1px solid rgba(239,68,68,0.25)",
-                  borderRadius: "10px",
-                  padding: "12px 16px",
-                  color: "#ef4444",
-                  fontSize: "13px",
-                  marginBottom: "20px",
-                  lineHeight: "1.4",
-                }}
-              >
+              <div className="bg-red-500/10 border border-red-500/20 text-red-500 text-sm rounded-xl px-4 py-3 leading-relaxed">
                 {error}
               </div>
             )}
 
-            {/* Button Submit */}
+            {/* Botão Submit */}
             <button
               type="submit"
               disabled={loading}
-              style={{
-                width: "100%",
-                padding: "14px",
-                background: loading ? "#7f1d1d" : "linear-gradient(135deg, #ef4444, #b91c1c)",
-                border: "none",
-                borderRadius: "12px",
-                color: "#fff",
-                fontSize: "15px",
-                fontWeight: 700,
-                cursor: loading ? "not-allowed" : "pointer",
-                transition: "all 0.3s",
-                boxShadow: "0 4px 20px rgba(239,68,68,0.25)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "8px",
-              }}
+              className="w-full h-12 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 text-white font-bold text-sm rounded-xl shadow-[0_0_30px_rgba(220,38,38,0.25)] transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {loading ? "Entrando..." : "Entrar"}
-              <ArrowRight style={{ width: "16px", height: "16px" }} />
             </button>
           </form>
 
-          {/* Form Switch */}
-          <p style={{ textAlign: "center", color: "#71717a", fontSize: "13px", marginTop: "24px", marginBottom: 0 }}>
-            Não possui uma conta?{" "}
-            <a href="/cadastro" style={{ color: "#ef4444", textDecoration: "none", fontWeight: 600 }}>
-              Cadastre-se
-            </a>
-          </p>
+          {/* Switch Register */}
+          <div className="text-center mt-6">
+            <p className="text-xs text-zinc-500">
+              Não possui uma conta?{" "}
+              <a href="/cadastro" className="text-red-500 hover:text-red-400 font-bold transition-colors">
+                Cadastre-se
+              </a>
+            </p>
+          </div>
         </div>
       </div>
     </div>

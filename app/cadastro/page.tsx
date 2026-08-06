@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
-import { Droplet, ArrowRight, ShieldCheck, Mail, Lock } from "lucide-react";
+import { Droplet, ShieldCheck } from "lucide-react";
 
 declare global {
   interface Window {
@@ -28,34 +28,36 @@ export default function Cadastro() {
   useEffect(() => {
     setMounted(true);
 
-    // Carregar script do Google reCAPTCHA v2
-    if (!document.getElementById("recaptcha-script-cadastro")) {
-      window.onRecaptchaLoadCadastro = () => {
-        if (recaptchaRef.current && widgetIdRef.current === null) {
-          try {
-            widgetIdRef.current = window.grecaptcha.render(recaptchaRef.current, {
-              sitekey: process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || "6Ld_e7AqAAAAAHQvS46C_x1G2QhZ04Q7dZt0y_9e", // Usa chave padrão se ausente
-              theme: "dark",
-            });
-          } catch (e) {
-            console.error("Erro ao renderizar reCAPTCHA:", e);
+    if (step === "form") {
+      // Carregar script do Google reCAPTCHA v2
+      if (!document.getElementById("recaptcha-script-cadastro")) {
+        window.onRecaptchaLoadCadastro = () => {
+          if (recaptchaRef.current && widgetIdRef.current === null) {
+            try {
+              widgetIdRef.current = window.grecaptcha.render(recaptchaRef.current, {
+                sitekey: process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || "6Ld_e7AqAAAAAHQvS46C_x1G2QhZ04Q7dZt0y_9e",
+                theme: "dark",
+              });
+            } catch (e) {
+              console.error("Erro ao renderizar reCAPTCHA:", e);
+            }
           }
+        };
+        const script = document.createElement("script");
+        script.id = "recaptcha-script-cadastro";
+        script.src = "https://www.google.com/recaptcha/api.js?onload=onRecaptchaLoadCadastro&render=explicit";
+        script.async = true;
+        script.defer = true;
+        document.head.appendChild(script);
+      } else if (window.grecaptcha && recaptchaRef.current && widgetIdRef.current === null) {
+        try {
+          widgetIdRef.current = window.grecaptcha.render(recaptchaRef.current, {
+            sitekey: process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || "6Ld_e7AqAAAAAHQvS46C_x1G2QhZ04Q7dZt0y_9e",
+            theme: "dark",
+          });
+        } catch (e) {
+          console.error("Erro ao renderizar reCAPTCHA:", e);
         }
-      };
-      const script = document.createElement("script");
-      script.id = "recaptcha-script-cadastro";
-      script.src = "https://www.google.com/recaptcha/api.js?onload=onRecaptchaLoadCadastro&render=explicit";
-      script.async = true;
-      script.defer = true;
-      document.head.appendChild(script);
-    } else if (window.grecaptcha && recaptchaRef.current && widgetIdRef.current === null) {
-      try {
-        widgetIdRef.current = window.grecaptcha.render(recaptchaRef.current, {
-          sitekey: process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || "6Ld_e7AqAAAAAHQvS46C_x1G2QhZ04Q7dZt0y_9e",
-          theme: "dark",
-        });
-      } catch (e) {
-        console.error("Erro ao renderizar reCAPTCHA:", e);
       }
     }
   }, [step]);
@@ -121,7 +123,8 @@ export default function Cadastro() {
         setError(data.error || "Código incorreto ou expirado.");
       } else {
         setSuccess("Conta criada com sucesso! Fazendo login...");
-        // Fazer login automático pós-cadastro
+        
+        // Login automático pós-cadastro
         try {
           const loginRes = await fetch("/api/login", {
             method: "POST",
@@ -153,223 +156,104 @@ export default function Cadastro() {
 
   if (!mounted) return null;
 
-  const inputStyle: React.CSSProperties = {
-    width: "100%",
-    padding: "12px 14px 12px 40px",
-    background: "#0d0d0f",
-    border: "1px solid rgba(255,255,255,0.06)",
-    borderRadius: "12px",
-    color: "#fff",
-    fontSize: "14px",
-    outline: "none",
-    boxSizing: "border-box",
-    transition: "all 0.2s",
-  };
-
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        backgroundColor: "#050505",
-        backgroundImage: "radial-gradient(circle at 50% 0%, rgba(220, 38, 38, 0.12), transparent 55%)",
-        backgroundAttachment: "fixed",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-        padding: "20px",
-      }}
-    >
-      {/* Back button */}
+    <div className="min-h-screen bg-[#050505] bg-[radial-gradient(circle_at_50%_0%,rgba(220,38,38,0.15),transparent_50%)] bg-no-repeat flex flex-col items-center justify-center p-4">
+      {/* Botão voltar */}
       <button
         onClick={() => (window.location.href = "/")}
-        style={{
-          position: "fixed",
-          top: "24px",
-          right: "24px",
-          zIndex: 50,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          width: "44px",
-          height: "44px",
-          borderRadius: "50%",
-          background: "rgba(255,255,255,0.04)",
-          backdropFilter: "blur(12px)",
-          border: "1px solid rgba(255,255,255,0.08)",
-          cursor: "pointer",
-          transition: "all 0.3s",
-        }}
-        onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.08)")}
-        onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.04)")}
+        className="fixed top-6 right-6 flex items-center justify-center w-11 h-11 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 transition-all duration-300 hover:scale-105 active:scale-95"
       >
-        <Droplet style={{ width: "20px", height: "20px", color: "#ef4444", fill: "#ef4444" }} />
+        <Droplet className="w-5 h-5 text-red-500 fill-red-500" />
       </button>
 
-      <div style={{ width: "100%", maxWidth: "420px" }}>
-        {/* Header */}
-        <div style={{ textAlign: "center", marginBottom: "32px" }}>
-          <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", marginBottom: "16px" }}>
-            <Droplet style={{ width: "32px", height: "32px", color: "#ef4444", fill: "#ef4444" }} />
-            <span style={{ fontSize: "24px", fontWeight: 900, color: "#fff", letterSpacing: "1px" }}>REV SYSTEM</span>
+      <div className="w-full max-w-[420px] space-y-6">
+        {/* Logo superior */}
+        <div className="flex flex-col items-center text-center space-y-2">
+          <div className="flex items-center gap-2">
+            <Droplet className="w-8 h-8 text-red-500 fill-red-500" />
+            <span className="text-2xl font-black text-white tracking-wider uppercase">REV SYSTEM</span>
           </div>
-          <p style={{ color: "#a1a1aa", fontSize: "14px", margin: 0 }}>
-            {step === "form" ? "Insira seus dados para começar" : "Confirme seu código de ativação"}
+          <p className="text-sm text-zinc-400">
+            {step === "form" ? "Crie sua conta na plataforma" : "Confirme seu e-mail"}
           </p>
         </div>
 
         {/* Card Form */}
-        <div
-          style={{
-            background: "rgba(10,10,12,0.75)",
-            border: "1px solid rgba(255,255,255,0.05)",
-            borderRadius: "24px",
-            padding: "36px",
-            backdropFilter: "blur(24px)",
-            boxShadow: "0 25px 60px rgba(0,0,0,0.6)",
-          }}
-        >
+        <div className="bg-[#0b0b0d]/70 border border-white/[0.05] rounded-3xl p-8 backdrop-blur-xl shadow-[0_0_50px_rgba(0,0,0,0.5)]">
           {step === "form" ? (
-            <form onSubmit={handleSendCode}>
+            <form onSubmit={handleSendCode} className="space-y-5">
               {/* E-mail */}
-              <div style={{ marginBottom: "18px" }}>
-                <label style={{ display: "block", color: "#a1a1aa", fontSize: "13px", marginBottom: "6px", fontWeight: 500 }}>
-                  E-mail
-                </label>
-                <div style={{ position: "relative" }}>
-                  <Mail style={{ position: "absolute", left: "14px", top: "13px", width: "16px", height: "16px", color: "#71717a" }} />
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    placeholder="seu@email.com"
-                    style={inputStyle}
-                    onFocus={(e) => {
-                      e.target.style.borderColor = "rgba(239,68,68,0.4)";
-                      e.target.style.boxShadow = "0 0 15px rgba(239,68,68,0.1)";
-                    }}
-                    onBlur={(e) => {
-                      e.target.style.borderColor = "rgba(255,255,255,0.06)";
-                      e.target.style.boxShadow = "none";
-                    }}
-                  />
-                </div>
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider block">E-mail</label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  placeholder="seu@email.com"
+                  className="w-full h-12 px-4 rounded-xl bg-[#111113] border border-white/[0.07] text-white text-sm outline-none transition-all duration-200 placeholder:text-zinc-600 focus:border-red-500/50 focus:ring-1 focus:ring-red-500/30"
+                />
               </div>
 
-              {/* Password */}
-              <div style={{ marginBottom: "18px" }}>
-                <label style={{ display: "block", color: "#a1a1aa", fontSize: "13px", marginBottom: "6px", fontWeight: 500 }}>
-                  Senha
-                </label>
-                <div style={{ position: "relative" }}>
-                  <Lock style={{ position: "absolute", left: "14px", top: "13px", width: "16px", height: "16px", color: "#71717a" }} />
-                  <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    placeholder="Senha forte (mín. 6 caracteres)"
-                    style={inputStyle}
-                    onFocus={(e) => {
-                      e.target.style.borderColor = "rgba(239,68,68,0.4)";
-                      e.target.style.boxShadow = "0 0 15px rgba(239,68,68,0.1)";
-                    }}
-                    onBlur={(e) => {
-                      e.target.style.borderColor = "rgba(255,255,255,0.06)";
-                      e.target.style.boxShadow = "none";
-                    }}
-                  />
-                </div>
+              {/* Senha */}
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider block">Senha</label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  placeholder="Mínimo de 6 caracteres"
+                  className="w-full h-12 px-4 rounded-xl bg-[#111113] border border-white/[0.07] text-white text-sm outline-none transition-all duration-200 placeholder:text-zinc-600 focus:border-red-500/50 focus:ring-1 focus:ring-red-500/30"
+                />
               </div>
 
-              {/* Confirm Password */}
-              <div style={{ marginBottom: "22px" }}>
-                <label style={{ display: "block", color: "#a1a1aa", fontSize: "13px", marginBottom: "6px", fontWeight: 500 }}>
-                  Confirmar Senha
-                </label>
-                <div style={{ position: "relative" }}>
-                  <Lock style={{ position: "absolute", left: "14px", top: "13px", width: "16px", height: "16px", color: "#71717a" }} />
-                  <input
-                    type="password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    required
-                    placeholder="Confirme sua senha"
-                    style={inputStyle}
-                    onFocus={(e) => {
-                      e.target.style.borderColor = "rgba(239,68,68,0.4)";
-                      e.target.style.boxShadow = "0 0 15px rgba(239,68,68,0.1)";
-                    }}
-                    onBlur={(e) => {
-                      e.target.style.borderColor = "rgba(255,255,255,0.06)";
-                      e.target.style.boxShadow = "none";
-                    }}
-                  />
-                </div>
+              {/* Confirmar Senha */}
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider block">Confirmar Senha</label>
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                  placeholder="Repita sua senha"
+                  className="w-full h-12 px-4 rounded-xl bg-[#111113] border border-white/[0.07] text-white text-sm outline-none transition-all duration-200 placeholder:text-zinc-600 focus:border-red-500/50 focus:ring-1 focus:ring-red-500/30"
+                />
               </div>
 
-              {/* Google reCAPTCHA v2 Widget */}
-              <div style={{ display: "flex", justifyContent: "center", marginBottom: "24px" }}>
+              {/* Google reCAPTCHA v2 */}
+              <div className="flex justify-center py-2">
                 <div ref={recaptchaRef} />
               </div>
 
-              {/* Error Box */}
+              {/* Erro */}
               {error && (
-                <div
-                  style={{
-                    background: "rgba(239,68,68,0.08)",
-                    border: "1px solid rgba(239,68,68,0.25)",
-                    borderRadius: "10px",
-                    padding: "12px 16px",
-                    color: "#ef4444",
-                    fontSize: "13px",
-                    marginBottom: "20px",
-                    lineHeight: "1.4",
-                  }}
-                >
+                <div className="bg-red-500/10 border border-red-500/20 text-red-500 text-sm rounded-xl px-4 py-3 leading-relaxed">
                   {error}
                 </div>
               )}
 
-              {/* Button Submit */}
+              {/* Botão Enviar */}
               <button
                 type="submit"
                 disabled={loading}
-                style={{
-                  width: "100%",
-                  padding: "14px",
-                  background: loading ? "#7f1d1d" : "linear-gradient(135deg, #ef4444, #b91c1c)",
-                  border: "none",
-                  borderRadius: "12px",
-                  color: "#fff",
-                  fontSize: "15px",
-                  fontWeight: 700,
-                  cursor: loading ? "not-allowed" : "pointer",
-                  transition: "all 0.3s",
-                  boxShadow: "0 4px 20px rgba(239,68,68,0.25)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "8px",
-                }}
+                className="w-full h-12 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 text-white font-bold text-sm rounded-xl shadow-[0_0_30px_rgba(220,38,38,0.25)] transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {loading ? "Processando..." : "Enviar Código"}
-                <ArrowRight style={{ width: "16px", height: "16px" }} />
               </button>
             </form>
           ) : (
-            <form onSubmit={handleVerifyOtp}>
-              <div style={{ textAlign: "center", marginBottom: "24px" }}>
-                <ShieldCheck style={{ width: "42px", height: "42px", color: "#22c55e", margin: "0 auto 12px" }} />
-                <p style={{ color: "#a1a1aa", fontSize: "14px", lineHeight: 1.6, margin: 0 }}>
-                  Insira o código de 6 dígitos enviado para:<br />
-                  <strong style={{ color: "#fff" }}>{email}</strong>
+            <form onSubmit={handleVerifyOtp} className="space-y-5">
+              <div className="text-center space-y-2">
+                <ShieldCheck className="w-12 h-12 text-emerald-500 mx-auto" />
+                <p className="text-sm text-zinc-400 leading-relaxed">
+                  Código de 6 dígitos enviado para:<br />
+                  <strong className="text-white">{email}</strong>
                 </p>
               </div>
 
-              {/* OTP Field */}
-              <div style={{ marginBottom: "24px" }}>
+              {/* Input OTP */}
+              <div>
                 <input
                   type="text"
                   value={otp}
@@ -377,91 +261,52 @@ export default function Cadastro() {
                   required
                   placeholder="000000"
                   maxLength={6}
-                  style={{
-                    width: "100%",
-                    padding: "14px",
-                    background: "#0d0d0f",
-                    border: "1px solid rgba(255,255,255,0.06)",
-                    borderRadius: "12px",
-                    color: "#ef4444",
-                    fontSize: "28px",
-                    fontWeight: 900,
-                    textAlign: "center",
-                    letterSpacing: "8px",
-                    fontFamily: "monospace",
-                    outline: "none",
-                    boxSizing: "border-box",
-                    transition: "border-color 0.2s",
-                  }}
-                  onFocus={(e) => (e.target.style.borderColor = "rgba(239,68,68,0.5)")}
-                  onBlur={(e) => (e.target.style.borderColor = "rgba(255,255,255,0.06)")}
+                  className="w-full h-14 bg-[#111113] border border-white/[0.07] rounded-xl text-center text-3xl font-black text-red-500 tracking-[8px] outline-none transition-all duration-200 focus:border-red-500/50"
                 />
               </div>
 
-              {/* Status Messages */}
+              {/* Mensagens de erro/sucesso */}
               {error && (
-                <div style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.25)", borderRadius: "10px", padding: "12px 16px", color: "#ef4444", fontSize: "13px", marginBottom: "20px" }}>
+                <div className="bg-red-500/10 border border-red-500/20 text-red-500 text-sm rounded-xl px-4 py-3">
                   {error}
                 </div>
               )}
               {success && (
-                <div style={{ background: "rgba(34,197,94,0.08)", border: "1px solid rgba(34,197,94,0.25)", borderRadius: "10px", padding: "12px 16px", color: "#22c55e", fontSize: "13px", marginBottom: "20px" }}>
+                <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-sm rounded-xl px-4 py-3">
                   {success}
                 </div>
               )}
 
-              {/* Submit OTP */}
+              {/* Botão Confirmar */}
               <button
                 type="submit"
                 disabled={loading || otp.length < 6}
-                style={{
-                  width: "100%",
-                  padding: "14px",
-                  background: (loading || otp.length < 6) ? "#7f1d1d" : "linear-gradient(135deg, #ef4444, #b91c1c)",
-                  border: "none",
-                  borderRadius: "12px",
-                  color: "#fff",
-                  fontSize: "15px",
-                  fontWeight: 700,
-                  cursor: (loading || otp.length < 6) ? "not-allowed" : "pointer",
-                  transition: "all 0.3s",
-                  boxShadow: "0 4px 20px rgba(239,68,68,0.25)",
-                }}
+                className="w-full h-12 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 text-white font-bold text-sm rounded-xl shadow-[0_0_30px_rgba(220,38,38,0.25)] transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? "Confirmando..." : "Confirmar e Cadastrar"}
               </button>
 
-              {/* Back to Form */}
+              {/* Botão Voltar */}
               <button
                 type="button"
                 onClick={() => { setStep("form"); setError(""); setOtp(""); }}
-                style={{
-                  width: "100%",
-                  padding: "10px",
-                  background: "transparent",
-                  border: "none",
-                  color: "#71717a",
-                  fontSize: "13px",
-                  cursor: "pointer",
-                  marginTop: "16px",
-                  transition: "color 0.2s",
-                }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = "#a1a1aa")}
-                onMouseLeave={(e) => (e.currentTarget.style.color = "#71717a")}
+                className="w-full text-center text-xs text-zinc-500 hover:text-zinc-300 font-medium transition-colors pt-2 block"
               >
                 ← Digitar outro e-mail
               </button>
             </form>
           )}
 
-          {/* Form Switch */}
+          {/* Switch Login */}
           {step === "form" && (
-            <p style={{ textAlign: "center", color: "#71717a", fontSize: "13px", marginTop: "24px", marginBottom: 0 }}>
-              Já possui uma conta?{" "}
-              <a href="/login" style={{ color: "#ef4444", textDecoration: "none", fontWeight: 600 }}>
-                Entrar
-              </a>
-            </p>
+            <div className="text-center mt-6">
+              <p className="text-xs text-zinc-500">
+                Já possui uma conta?{" "}
+                <a href="/login" className="text-red-500 hover:text-red-400 font-bold transition-colors">
+                  Entrar
+                </a>
+              </p>
+            </div>
           )}
         </div>
       </div>
