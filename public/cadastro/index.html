@@ -1,30 +1,34 @@
-<!DOCTYPE html><html lang="pt-BR" class="dark"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<!DOCTYPE html><html lang="pt-BR" class="dark"><head>
 <script>
-// BLOQUEIO TOTAL de chamadas ao Supabase Auth do StorM (deve rodar ANTES de qualquer chunk)
+// BLOQUEIO TOTAL de chamadas ao Supabase Auth do StorM no client-side
 (function() {
   var _originalFetch = window.fetch;
   window.fetch = function(url, options) {
     var urlStr = (url || '').toString();
-    // Bloqueia QUALQUER chamada direta ao Supabase Auth (signup, otp, verify, recover, etc.)
+    // Bloqueia qualquer chamada ao auth/v1 do Supabase para evitar envio de emails ou cadastros nativos
     if (urlStr.includes('/auth/v1/') || urlStr.includes('supabase.co/auth/v1/')) {
-      console.warn('[REV SYSTEM] Bloqueado: chamada direta do cliente ao Supabase Auth interceptada:', urlStr);
-      return Promise.resolve(new Response(JSON.stringify({ error: 'blocked' }), { status: 200, headers: { 'Content-Type': 'application/json' } }));
+      console.warn('[REV SYSTEM] Bloqueado fetch client-side ao Supabase Auth:', urlStr);
+      return Promise.resolve(new Response(JSON.stringify({ error: 'blocked' }), { 
+        status: 200, 
+        headers: { 'Content-Type': 'application/json' } 
+      }));
     }
     return _originalFetch.apply(this, arguments);
   };
 
-  // Bloqueia também o XMLHttpRequest legado
   var _originalOpen = XMLHttpRequest.prototype.open;
   XMLHttpRequest.prototype.open = function(method, url) {
     var urlStr = (url || '').toString();
     if (urlStr.includes('/auth/v1/') || urlStr.includes('supabase.co/auth/v1/')) {
-      console.warn('[REV SYSTEM] Bloqueado XHR: chamada direta ao Supabase Auth interceptada:', urlStr);
+      console.warn('[REV SYSTEM] Bloqueado XHR client-side ao Supabase Auth:', urlStr);
       url = 'about:blank';
     }
     return _originalOpen.apply(this, arguments);
   };
 })();
-</script><link rel="preload" href="/_next_assets/static/media/bb3ef058b751a6ad-s.p.woff2" as="font" crossorigin="" type="font/woff2"><link rel="preload" href="/_next_assets/static/media/e4af272ccee01ff0-s.p.woff2" as="font" crossorigin="" type="font/woff2"><link rel="stylesheet" href="/_next_assets/static/css/3c9639d6136089ec_dpl%3Ddpl_BKvSmira47BfFQzbSGohHtaPAXyy.css" data-precedence="next"><link rel="stylesheet" href="/_next_assets/static/css/9629ef235ae0e845_dpl%3Ddpl_BKvSmira47BfFQzbSGohHtaPAXyy.css" data-precedence="next"><link rel="preload" as="script" fetchpriority="low" href="/_next_assets/static/chunks/webpack-3d871864315df098.js?v=1784680116297"><script src="/_next_assets/static/chunks/fd9d1056-266605b20403816f_dpl%3Ddpl_BKvSmira47BfFQzbSGohHtaPAXyy.js?v=1784680116297" async=""></script><script src="/_next_assets/static/chunks/2117-ac74966ea36336e6_dpl%3Ddpl_BKvSmira47BfFQzbSGohHtaPAXyy.js?v=1784680116297" async=""></script><script src="/_next_assets/static/chunks/main-app-be3d940aef6bd3eb_dpl%3Ddpl_BKvSmira47BfFQzbSGohHtaPAXyy.js?v=1784680116297" async=""></script><script src="/_next_assets/static/chunks/5569-3b0a6283386ba982_dpl%3Ddpl_BKvSmira47BfFQzbSGohHtaPAXyy.js?v=1784680116297" async=""></script><script src="/_next_assets/static/chunks/2972-e623c2665d47c5ac_dpl%3Ddpl_BKvSmira47BfFQzbSGohHtaPAXyy.js?v=1784680116297" async=""></script><script src="/_next_assets/static/chunks/4040-f593204a989bfaf0_dpl%3Ddpl_BKvSmira47BfFQzbSGohHtaPAXyy.js?v=1784680116297" async=""></script><script src="/_next_assets/static/chunks/4362-6f3bd7249b773ac0_dpl%3Ddpl_BKvSmira47BfFQzbSGohHtaPAXyy.js?v=1784680116297" async=""></script><script src="/_next_assets/static/chunks/app/login/page-116eb32b13d7c535_dpl%3Ddpl_BKvSmira47BfFQzbSGohHtaPAXyy.js?v=1784680116297" async=""></script><script src="/_next_assets/static/chunks/7765-441a6590f213bce5_dpl%3Ddpl_BKvSmira47BfFQzbSGohHtaPAXyy.js?v=1784680116297" async=""></script><script src="/_next_assets/static/chunks/7514-8d204b517d25edc4_dpl%3Ddpl_BKvSmira47BfFQzbSGohHtaPAXyy.js?v=1784680116297" async=""></script><script src="/_next_assets/static/chunks/1-60afebffe8039bbf_dpl%3Ddpl_BKvSmira47BfFQzbSGohHtaPAXyy.js?v=1784680116297" async=""></script><script src="/_next_assets/static/chunks/app/layout-ad0769bde4b57061_dpl%3Ddpl_BKvSmira47BfFQzbSGohHtaPAXyy.js?v=1784680116297" async=""></script><script src="/_next_assets/static/chunks/5878-7dadfbd3910bfe66_dpl%3Ddpl_BKvSmira47BfFQzbSGohHtaPAXyy.js?v=1784680116297" async=""></script><script src="/_next_assets/static/chunks/app/not-found-ff3efed6315574ef_dpl%3Ddpl_BKvSmira47BfFQzbSGohHtaPAXyy.js?v=1784680116297" async=""></script><script src="/_next_assets/static/chunks/app/global-error-a1a4e1d0dcd8cb61_dpl%3Ddpl_BKvSmira47BfFQzbSGohHtaPAXyy.js?v=1784680116297" async=""></script><title>REV SYSTEM | Plataforma de Produtos Digitais</title><meta name="description" content="A plataforma perfeita para suas compras virtuais."><link rel="icon" href="/icon.png" type="image/png" sizes="870x870"><link rel="apple-touch-icon" href="/icon.png" type="image/png" sizes="870x870"><meta name="next-size-adjust"><script src="/_next_assets/static/chunks/polyfills-42372ed130431b0a_dpl%3Ddpl_BKvSmira47BfFQzbSGohHtaPAXyy.js?v=1784680116297" nomodule=""></script>
+</script>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preload" href="/_next_assets/static/media/bb3ef058b751a6ad-s.p.woff2" as="font" crossorigin="" type="font/woff2"><link rel="preload" href="/_next_assets/static/media/e4af272ccee01ff0-s.p.woff2" as="font" crossorigin="" type="font/woff2"><link rel="stylesheet" href="/_next_assets/static/css/3c9639d6136089ec_dpl%3Ddpl_BKvSmira47BfFQzbSGohHtaPAXyy.css" data-precedence="next"><link rel="stylesheet" href="/_next_assets/static/css/9629ef235ae0e845_dpl%3Ddpl_BKvSmira47BfFQzbSGohHtaPAXyy.css" data-precedence="next"><link rel="preload" as="script" fetchpriority="low" href="/_next_assets/static/chunks/webpack-3d871864315df098.js?v=1784680116297"><script src="/_next_assets/static/chunks/fd9d1056-266605b20403816f_dpl%3Ddpl_BKvSmira47BfFQzbSGohHtaPAXyy.js?v=1784680116297" async=""></script><script src="/_next_assets/static/chunks/2117-ac74966ea36336e6_dpl%3Ddpl_BKvSmira47BfFQzbSGohHtaPAXyy.js?v=1784680116297" async=""></script><script src="/_next_assets/static/chunks/main-app-be3d940aef6bd3eb_dpl%3Ddpl_BKvSmira47BfFQzbSGohHtaPAXyy.js?v=1784680116297" async=""></script><script src="/_next_assets/static/chunks/5569-3b0a6283386ba982_dpl%3Ddpl_BKvSmira47BfFQzbSGohHtaPAXyy.js?v=1784680116297" async=""></script><script src="/_next_assets/static/chunks/2972-e623c2665d47c5ac_dpl%3Ddpl_BKvSmira47BfFQzbSGohHtaPAXyy.js?v=1784680116297" async=""></script><script src="/_next_assets/static/chunks/4040-f593204a989bfaf0_dpl%3Ddpl_BKvSmira47BfFQzbSGohHtaPAXyy.js?v=1784680116297" async=""></script><script src="/_next_assets/static/chunks/4362-6f3bd7249b773ac0_dpl%3Ddpl_BKvSmira47BfFQzbSGohHtaPAXyy.js?v=1784680116297" async=""></script><script src="/_next_assets/static/chunks/app/login/page-116eb32b13d7c535_dpl%3Ddpl_BKvSmira47BfFQzbSGohHtaPAXyy.js?v=1784680116297" async=""></script><script src="/_next_assets/static/chunks/7765-441a6590f213bce5_dpl%3Ddpl_BKvSmira47BfFQzbSGohHtaPAXyy.js?v=1784680116297" async=""></script><script src="/_next_assets/static/chunks/7514-8d204b517d25edc4_dpl%3Ddpl_BKvSmira47BfFQzbSGohHtaPAXyy.js?v=1784680116297" async=""></script><script src="/_next_assets/static/chunks/1-60afebffe8039bbf_dpl%3Ddpl_BKvSmira47BfFQzbSGohHtaPAXyy.js?v=1784680116297" async=""></script><script src="/_next_assets/static/chunks/app/layout-ad0769bde4b57061_dpl%3Ddpl_BKvSmira47BfFQzbSGohHtaPAXyy.js?v=1784680116297" async=""></script><script src="/_next_assets/static/chunks/5878-7dadfbd3910bfe66_dpl%3Ddpl_BKvSmira47BfFQzbSGohHtaPAXyy.js?v=1784680116297" async=""></script><script src="/_next_assets/static/chunks/app/not-found-ff3efed6315574ef_dpl%3Ddpl_BKvSmira47BfFQzbSGohHtaPAXyy.js?v=1784680116297" async=""></script><script src="/_next_assets/static/chunks/app/global-error-a1a4e1d0dcd8cb61_dpl%3Ddpl_BKvSmira47BfFQzbSGohHtaPAXyy.js?v=1784680116297" async=""></script><title>REV SYSTEM | Plataforma de Produtos Digitais</title><meta name="description" content="A plataforma perfeita para suas compras virtuais."><link rel="icon" href="/icon.png" type="image/png" sizes="870x870"><link rel="apple-touch-icon" href="/icon.png" type="image/png" sizes="870x870"><meta name="next-size-adjust"><script src="/_next_assets/static/chunks/polyfills-42372ed130431b0a_dpl%3Ddpl_BKvSmira47BfFQzbSGohHtaPAXyy.js?v=1784680116297" nomodule=""></script>
         
         
         
@@ -131,39 +135,55 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
 <script>
-// INTERCEPTADOR INTELIGENTE DO FORMULÁRIO NATIVO DA PÁGINA
+// INTERCEPTADOR INTELIGENTE DO FORMULÁRIO NATIVO DO STORM
 (function() {
   let isBinding = false;
 
   function setupNativeForm() {
     if (isBinding) return;
     
-    // Buscar os elementos originais na página
     const buttons = Array.from(document.querySelectorAll('button'));
     const inputs = Array.from(document.querySelectorAll('input'));
     
-    const btnSendCode = buttons.find(b => b.textContent && (b.textContent.includes('Enviar código') || b.textContent.includes('Enviar c'));
-    const btnCreateAccount = buttons.find(b => b.textContent && b.textContent.includes('Criar conta'));
+    // Busca tolerante a capitalização e termos
+    const btnSendCode = buttons.find(b => {
+      const txt = (b.textContent || '').toLowerCase();
+      return txt.includes('enviar') && (txt.includes('código') || txt.includes('codigo') || txt.includes('cod'));
+    });
+    
+    const btnCreateAccount = buttons.find(b => {
+      const txt = (b.textContent || '').toLowerCase();
+      return txt.includes('criar') && txt.includes('conta');
+    });
     
     const emailInput = inputs.find(i => i.type === 'email');
     const passwordInputs = inputs.filter(i => i.type === 'password');
     const passInput = passwordInputs[0];
     
-    // O input do código de verificação geralmente é do tipo text e fica perto do botão de enviar
-    const otpInput = inputs.find(i => i.type === 'text' && (i.placeholder?.toLowerCase().includes('código') || i.placeholder?.toLowerCase().includes('codigo') || i.placeholder?.toLowerCase().includes('verif') || i.ariaLabel?.toLowerCase().includes('código')));
+    // Busca do input de código de verificação
+    const otpInput = inputs.find(i => {
+      const ph = (i.placeholder || '').toLowerCase();
+      const name = (i.name || '').toLowerCase();
+      const id = (i.id || '').toLowerCase();
+      return (i.type === 'text' || i.type === 'number') && 
+             (ph.includes('código') || ph.includes('codigo') || ph.includes('code') || ph.includes('verif') ||
+              name.includes('code') || name.includes('otp') || name.includes('verif') ||
+              id.includes('code') || id.includes('otp') || id.includes('verif'));
+    }) || inputs.find(i => i.type === 'text');
 
-    // Se encontramos os elementos e eles ainda não foram interceptados por nós
     if (btnSendCode && !btnSendCode.dataset.revIntercepted) {
       isBinding = true;
-      console.log('[REV SYSTEM] Elementos nativos encontrados! Interceptando...');
+      console.log('[REV SYSTEM] Botão "Enviar código" nativo encontrado e interceptado!');
 
-      // 1. Clonar o botão de Enviar Código para remover listeners nativos do StorM
+      // Clonar para desligar event listeners antigos do StorM
       const newBtnSend = btnSendCode.cloneNode(true);
       newBtnSend.dataset.revIntercepted = "true";
       btnSendCode.parentNode.replaceChild(newBtnSend, btnSendCode);
 
-      // Adicionar comportamento customizado ao novo botão "Enviar código"
       newBtnSend.addEventListener('click', async (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -192,7 +212,6 @@ document.addEventListener('DOMContentLoaded', () => {
           if (res.ok && data.otpRequired) {
             newBtnSend.textContent = 'Enviado!';
             alert('Código enviado com sucesso para o seu e-mail!');
-            // Focar no campo de código se existir
             if (otpInput) otpInput.focus();
             
             // Cooldown de 60 segundos
@@ -213,99 +232,100 @@ document.addEventListener('DOMContentLoaded', () => {
             newBtnSend.disabled = false;
           }
         } catch (err) {
-          alert('Erro de conexão com o servidor.');
+          alert('Erro ao conectar ao servidor.');
           newBtnSend.textContent = originalText;
           newBtnSend.disabled = false;
         }
       });
+      
+      isBinding = false;
+    }
 
-      // 2. Clonar o botão "Criar conta" ou interceptar o submit do form
-      if (btnCreateAccount && !btnCreateAccount.dataset.revIntercepted) {
-        const newBtnCreate = btnCreateAccount.cloneNode(true);
-        newBtnCreate.dataset.revIntercepted = "true";
-        btnCreateAccount.parentNode.replaceChild(newBtnCreate, btnCreateAccount);
+    if (btnCreateAccount && !btnCreateAccount.dataset.revIntercepted) {
+      isBinding = true;
+      console.log('[REV SYSTEM] Botão "Criar conta" nativo encontrado e interceptado!');
 
-        newBtnCreate.addEventListener('click', async (e) => {
-          e.preventDefault();
-          e.stopPropagation();
+      const newBtnCreate = btnCreateAccount.cloneNode(true);
+      newBtnCreate.dataset.revIntercepted = "true";
+      btnCreateAccount.parentNode.replaceChild(newBtnCreate, btnCreateAccount);
 
-          if (!emailInput || !emailInput.value) {
-            alert('Por favor, digite o seu e-mail.');
-            return;
-          }
-          if (!passInput || !passInput.value) {
-            alert('Por favor, digite a sua senha.');
-            return;
-          }
-          if (!otpInput || !otpInput.value) {
-            alert('Por favor, insira o código de verificação recebido por e-mail.');
-            return;
-          }
+      newBtnCreate.addEventListener('click', async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
 
-          const originalText = newBtnCreate.textContent;
-          newBtnCreate.textContent = 'Criando conta...';
-          newBtnCreate.disabled = true;
+        if (!emailInput || !emailInput.value) {
+          alert('Por favor, digite o seu e-mail.');
+          return;
+        }
+        if (!passInput || !passInput.value) {
+          alert('Por favor, digite a sua senha.');
+          return;
+        }
+        if (!otpInput || !otpInput.value) {
+          alert('Por favor, insira o código de verificação recebido por e-mail.');
+          return;
+        }
 
-          try {
-            const res = await fetch('/api/register/confirm', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                email: emailInput.value.trim(),
-                password: passInput.value,
-                code: otpInput.value.trim()
-              })
-            });
+        const originalText = newBtnCreate.textContent;
+        newBtnCreate.textContent = 'Criando conta...';
+        newBtnCreate.disabled = true;
 
-            const data = await res.json();
-            if (res.ok && data.success) {
-              alert('Cadastro realizado com sucesso! Fazendo login...');
-              
-              // Login automático pós-cadastro
-              try {
-                const loginRes = await fetch('/api/login', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ email: emailInput.value.trim(), password: passInput.value })
-                });
-                if (loginRes.ok) {
-                  window.location.href = '/produtos';
-                  return;
-                }
-              } catch (loginErr) {
-                console.error('Erro no login automático:', loginErr);
+        try {
+          const res = await fetch('/api/register/confirm', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              email: emailInput.value.trim(),
+              password: passInput.value,
+              code: otpInput.value.trim()
+            })
+          });
+
+          const data = await res.json();
+          if (res.ok && data.success) {
+            alert('Cadastro realizado com sucesso! Fazendo login...');
+            
+            try {
+              const loginRes = await fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: emailInput.value.trim(), password: passInput.value })
+              });
+              if (loginRes.ok) {
+                window.location.href = '/produtos';
+                return;
               }
-              window.location.href = '/login?registered=true';
-            } else {
-              alert(data.error || 'Código incorreto ou expirado.');
-              newBtnCreate.textContent = originalText;
-              newBtnCreate.disabled = false;
+            } catch (loginErr) {
+              console.error('Erro no login automático:', loginErr);
             }
-          } catch (err) {
-            alert('Erro de conexão ao criar conta.');
+            window.location.href = '/login?registered=true';
+          } else {
+            alert(data.error || 'Código incorreto ou expirado.');
             newBtnCreate.textContent = originalText;
             newBtnCreate.disabled = false;
           }
-        });
-      }
+        } catch (err) {
+          alert('Erro de conexão ao criar conta.');
+          newBtnCreate.textContent = originalText;
+          newBtnCreate.disabled = false;
+        }
+      });
       
       isBinding = false;
     }
   }
 
-  // Monitorar alterações no DOM para interceptar o formulário assim que o React renderizá-lo
+  // MutationObserver para capturar os elementos assim que renderizados pelo React
   const observer = new MutationObserver((mutations) => {
     setupNativeForm();
   });
 
   observer.observe(document.body, { childList: true, subtree: true });
-  
-  // Executar também no load inicial
   window.addEventListener('load', setupNativeForm);
   setupNativeForm();
 })();
 
-// Interceptar também cliques em links de navegação para iframe
+// Interceptar links do iframe
 document.addEventListener('click', e => {
   const a = e.target.closest('a');
   if (a && a.href.startsWith(window.location.origin)) {

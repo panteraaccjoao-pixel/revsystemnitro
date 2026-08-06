@@ -9,56 +9,94 @@ if (!fs.existsSync(filePath)) {
 
 let content = fs.readFileSync(filePath, 'utf8');
 
-// 1. Remover a div do modal customizada injetada anteriormente se ela existir
-const modalRegex = /<div id="otp-modal"[\s\S]*?<\/div>\s*<\/div>/g;
-content = content.replace(modalRegex, '');
+// 1. Limpar qualquer resquício de scripts anteriores que injetamos (começando com BLOQUEIO TOTAL ou INTERCEPTADOR)
+content = content.replace(/<script>\s*\/\/\s*BLOQUEIO TOTAL[\s\S]*?<\/script>/gi, '');
+content = content.replace(/<script>\s*\/\/\s*INTERCEPTADOR INTELIGENTE[\s\S]*?<\/script>/gi, '');
+content = content.replace(/<script>\s*document\.addEventListener\('click'[\s\S]*?<\/script>/gi, '');
 
-// 2. Localizar o final da tag body e substituir o script anterior pelo novo script inteligente
-const scriptBlockRegex = /<script>\s*\/\/\s*BLOQUEIO TOTAL[\s\S]*?<\/script>/g;
-// Mantemos o bloqueio total no head para chamadas diretas ao Supabase
-// Mas no final do body, removemos os scripts antigos que injetamos (incluindo o que tinha btnConfirmOtp) e colocamos o novo interceptor nativo
-const oldScriptPattern = /const otpModal = document\.getElementById\('otp-modal'\);[\s\S]*?<\/script>/g;
-content = content.replace(oldScriptPattern, '');
-
-// Vamos limpar também outras tags de scripts que injetamos anteriormente para evitar duplicidade
-content = content.replace(/<script>\s*document\.addEventListener\('click'[\s\S]*?<\/script>/g, '');
-content = content.replace(/<script>\s*\/\/\s*Wait for React to hydrate[\s\S]*?<\/script>/g, '');
-
-// Criar o novo script inteligente para rodar no final do body
-const newScript = `
+// 2. Injetar o BLOQUEADOR DE FETCH definitivo no HEAD (primeira linha após o head)
+const fetchBlocker = `
 <script>
-// INTERCEPTADOR INTELIGENTE DO FORMULÁRIO NATIVO DA PÁGINA
+// BLOQUEIO TOTAL de chamadas ao Supabase Auth do StorM no client-side
+(function() {
+  var _originalFetch = window.fetch;
+  window.fetch = function(url, options) {
+    var urlStr = (url || '').toString();
+    // Bloqueia qualquer chamada ao auth/v1 do Supabase para evitar envio de emails ou cadastros nativos
+    if (urlStr.includes('/auth/v1/') || urlStr.includes('supabase.co/auth/v1/')) {
+      console.warn('[REV SYSTEM] Bloqueado fetch client-side ao Supabase Auth:', urlStr);
+      return Promise.resolve(new Response(JSON.stringify({ error: 'blocked' }), { 
+        status: 200, 
+        headers: { 'Content-Type': 'application/json' } 
+      }));
+    }
+    return _originalFetch.apply(this, arguments);
+  };
+
+  var _originalOpen = XMLHttpRequest.prototype.open;
+  XMLHttpRequest.prototype.open = function(method, url) {
+    var urlStr = (url || '').toString();
+    if (urlStr.includes('/auth/v1/') || urlStr.includes('supabase.co/auth/v1/')) {
+      console.warn('[REV SYSTEM] Bloqueado XHR client-side ao Supabase Auth:', urlStr);
+      url = 'about:blank';
+    }
+    return _originalOpen.apply(this, arguments);
+  };
+})();
+</script>
+`;
+
+// Injeta o bloqueador logo após a tag <head>
+content = content.replace(/<head>/i, '<head>' + fetchBlocker);
+
+// 3. Injetar o novo INTERCEPTADOR DO DOM nativo no final do body
+const domInterceptor = `
+<script>
+// INTERCEPTADOR INTELIGENTE DO FORMULÁRIO NATIVO DO STORM
 (function() {
   let isBinding = false;
 
   function setupNativeForm() {
     if (isBinding) return;
     
-    // Buscar os elementos originais na página
     const buttons = Array.from(document.querySelectorAll('button'));
     const inputs = Array.from(document.querySelectorAll('input'));
     
-    const btnSendCode = buttons.find(b => b.textContent && (b.textContent.includes('Enviar código') || b.textContent.includes('Enviar c'));
-    const btnCreateAccount = buttons.find(b => b.textContent && b.textContent.includes('Criar conta'));
+    // Busca tolerante a capitalização e termos
+    const btnSendCode = buttons.find(b => {
+      const txt = (b.textContent || '').toLowerCase();
+      return txt.includes('enviar') && (txt.includes('código') || txt.includes('codigo') || txt.includes('cod'));
+    });
+    
+    const btnCreateAccount = buttons.find(b => {
+      const txt = (b.textContent || '').toLowerCase();
+      return txt.includes('criar') && txt.includes('conta');
+    });
     
     const emailInput = inputs.find(i => i.type === 'email');
     const passwordInputs = inputs.filter(i => i.type === 'password');
     const passInput = passwordInputs[0];
     
-    // O input do código de verificação geralmente é do tipo text e fica perto do botão de enviar
-    const otpInput = inputs.find(i => i.type === 'text' && (i.placeholder?.toLowerCase().includes('código') || i.placeholder?.toLowerCase().includes('codigo') || i.placeholder?.toLowerCase().includes('verif') || i.ariaLabel?.toLowerCase().includes('código')));
+    // Busca do input de código de verificação
+    const otpInput = inputs.find(i => {
+      const ph = (i.placeholder || '').toLowerCase();
+      const name = (i.name || '').toLowerCase();
+      const id = (i.id || '').toLowerCase();
+      return (i.type === 'text' || i.type === 'number') && 
+             (ph.includes('código') || ph.includes('codigo') || ph.includes('code') || ph.includes('verif') ||
+              name.includes('code') || name.includes('otp') || name.includes('verif') ||
+              id.includes('code') || id.includes('otp') || id.includes('verif'));
+    }) || inputs.find(i => i.type === 'text');
 
-    // Se encontramos os elementos e eles ainda não foram interceptados por nós
     if (btnSendCode && !btnSendCode.dataset.revIntercepted) {
       isBinding = true;
-      console.log('[REV SYSTEM] Elementos nativos encontrados! Interceptando...');
+      console.log('[REV SYSTEM] Botão "Enviar código" nativo encontrado e interceptado!');
 
-      // 1. Clonar o botão de Enviar Código para remover listeners nativos do StorM
+      // Clonar para desligar event listeners antigos do StorM
       const newBtnSend = btnSendCode.cloneNode(true);
       newBtnSend.dataset.revIntercepted = "true";
       btnSendCode.parentNode.replaceChild(newBtnSend, btnSendCode);
 
-      // Adicionar comportamento customizado ao novo botão "Enviar código"
       newBtnSend.addEventListener('click', async (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -87,7 +125,6 @@ const newScript = `
           if (res.ok && data.otpRequired) {
             newBtnSend.textContent = 'Enviado!';
             alert('Código enviado com sucesso para o seu e-mail!');
-            // Focar no campo de código se existir
             if (otpInput) otpInput.focus();
             
             // Cooldown de 60 segundos
@@ -108,99 +145,100 @@ const newScript = `
             newBtnSend.disabled = false;
           }
         } catch (err) {
-          alert('Erro de conexão com o servidor.');
+          alert('Erro ao conectar ao servidor.');
           newBtnSend.textContent = originalText;
           newBtnSend.disabled = false;
         }
       });
+      
+      isBinding = false;
+    }
 
-      // 2. Clonar o botão "Criar conta" ou interceptar o submit do form
-      if (btnCreateAccount && !btnCreateAccount.dataset.revIntercepted) {
-        const newBtnCreate = btnCreateAccount.cloneNode(true);
-        newBtnCreate.dataset.revIntercepted = "true";
-        btnCreateAccount.parentNode.replaceChild(newBtnCreate, btnCreateAccount);
+    if (btnCreateAccount && !btnCreateAccount.dataset.revIntercepted) {
+      isBinding = true;
+      console.log('[REV SYSTEM] Botão "Criar conta" nativo encontrado e interceptado!');
 
-        newBtnCreate.addEventListener('click', async (e) => {
-          e.preventDefault();
-          e.stopPropagation();
+      const newBtnCreate = btnCreateAccount.cloneNode(true);
+      newBtnCreate.dataset.revIntercepted = "true";
+      btnCreateAccount.parentNode.replaceChild(newBtnCreate, btnCreateAccount);
 
-          if (!emailInput || !emailInput.value) {
-            alert('Por favor, digite o seu e-mail.');
-            return;
-          }
-          if (!passInput || !passInput.value) {
-            alert('Por favor, digite a sua senha.');
-            return;
-          }
-          if (!otpInput || !otpInput.value) {
-            alert('Por favor, insira o código de verificação recebido por e-mail.');
-            return;
-          }
+      newBtnCreate.addEventListener('click', async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
 
-          const originalText = newBtnCreate.textContent;
-          newBtnCreate.textContent = 'Criando conta...';
-          newBtnCreate.disabled = true;
+        if (!emailInput || !emailInput.value) {
+          alert('Por favor, digite o seu e-mail.');
+          return;
+        }
+        if (!passInput || !passInput.value) {
+          alert('Por favor, digite a sua senha.');
+          return;
+        }
+        if (!otpInput || !otpInput.value) {
+          alert('Por favor, insira o código de verificação recebido por e-mail.');
+          return;
+        }
 
-          try {
-            const res = await fetch('/api/register/confirm', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                email: emailInput.value.trim(),
-                password: passInput.value,
-                code: otpInput.value.trim()
-              })
-            });
+        const originalText = newBtnCreate.textContent;
+        newBtnCreate.textContent = 'Criando conta...';
+        newBtnCreate.disabled = true;
 
-            const data = await res.json();
-            if (res.ok && data.success) {
-              alert('Cadastro realizado com sucesso! Fazendo login...');
-              
-              // Login automático pós-cadastro
-              try {
-                const loginRes = await fetch('/api/login', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ email: emailInput.value.trim(), password: passInput.value })
-                });
-                if (loginRes.ok) {
-                  window.location.href = '/produtos';
-                  return;
-                }
-              } catch (loginErr) {
-                console.error('Erro no login automático:', loginErr);
+        try {
+          const res = await fetch('/api/register/confirm', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              email: emailInput.value.trim(),
+              password: passInput.value,
+              code: otpInput.value.trim()
+            })
+          });
+
+          const data = await res.json();
+          if (res.ok && data.success) {
+            alert('Cadastro realizado com sucesso! Fazendo login...');
+            
+            try {
+              const loginRes = await fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: emailInput.value.trim(), password: passInput.value })
+              });
+              if (loginRes.ok) {
+                window.location.href = '/produtos';
+                return;
               }
-              window.location.href = '/login?registered=true';
-            } else {
-              alert(data.error || 'Código incorreto ou expirado.');
-              newBtnCreate.textContent = originalText;
-              newBtnCreate.disabled = false;
+            } catch (loginErr) {
+              console.error('Erro no login automático:', loginErr);
             }
-          } catch (err) {
-            alert('Erro de conexão ao criar conta.');
+            window.location.href = '/login?registered=true';
+          } else {
+            alert(data.error || 'Código incorreto ou expirado.');
             newBtnCreate.textContent = originalText;
             newBtnCreate.disabled = false;
           }
-        });
-      }
+        } catch (err) {
+          alert('Erro de conexão ao criar conta.');
+          newBtnCreate.textContent = originalText;
+          newBtnCreate.disabled = false;
+        }
+      });
       
       isBinding = false;
     }
   }
 
-  // Monitorar alterações no DOM para interceptar o formulário assim que o React renderizá-lo
+  // MutationObserver para capturar os elementos assim que renderizados pelo React
   const observer = new MutationObserver((mutations) => {
     setupNativeForm();
   });
 
   observer.observe(document.body, { childList: true, subtree: true });
-  
-  // Executar também no load inicial
   window.addEventListener('load', setupNativeForm);
   setupNativeForm();
 })();
 
-// Interceptar também cliques em links de navegação para iframe
+// Interceptar links do iframe
 document.addEventListener('click', e => {
   const a = e.target.closest('a');
   if (a && a.href.startsWith(window.location.origin)) {
@@ -213,9 +251,9 @@ document.addEventListener('click', e => {
 </html>
 `;
 
-// Remover a tag de fechamento body/html original e concatenar o novo script
+// Remover fechamento antigo do body e anexar o novo script
 content = content.replace(/<\/body>\s*<\/html>/i, '');
-content += newScript;
+content += domInterceptor;
 
 fs.writeFileSync(filePath, content, 'utf8');
-console.log("✓ HTML de cadastro modificado com sucesso com o novo interceptador nativo do DOM.");
+console.log("✓ HTML de cadastro patcheado com sucesso.");
