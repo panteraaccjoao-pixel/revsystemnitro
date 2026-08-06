@@ -97,7 +97,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const recaptchaKey = urlParams.get('recaptchaKey');
 
     if (form) {
-        // Se a chave estiver presente, ativa o reCAPTCHA v2 no formulário
+        // Clonar o formulário para remover os event listeners do chunk do StorM
+        const newForm = form.cloneNode(true);
+        form.parentNode.replaceChild(newForm, form);
+
+        // Se a chave estiver presente, ativa o reCAPTCHA v2 no formulário clonado
         if (recaptchaKey && recaptchaKey.trim() !== '') {
             // 1. Injetar Script do Google reCAPTCHA v2
             const script = document.createElement('script');
@@ -106,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
             script.defer = true;
             document.head.appendChild(script);
 
-            // 2. Injetar Widget no formulário (antes do botão de entrar)
+            // 2. Injetar Widget no formulário clonado (antes do botão de entrar)
             const recaptchaDiv = document.createElement('div');
             recaptchaDiv.className = 'g-recaptcha';
             recaptchaDiv.setAttribute('data-sitekey', recaptchaKey);
@@ -115,18 +119,21 @@ document.addEventListener('DOMContentLoaded', () => {
             recaptchaDiv.style.display = 'flex';
             recaptchaDiv.style.justifyContent = 'center';
 
-            const submitBtn = form.querySelector('button[type="submit"]');
+            const submitBtn = newForm.querySelector('button[type="submit"]');
             if (submitBtn) {
-                form.insertBefore(recaptchaDiv, submitBtn);
+                newForm.insertBefore(recaptchaDiv, submitBtn);
             } else {
-                form.appendChild(recaptchaDiv);
+                newForm.appendChild(recaptchaDiv);
             }
         }
 
-        form.addEventListener('submit', async (e) => {
+        newForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const emailInput = form.querySelector('input[type="email"], input[name="email"]');
-            const passInput = form.querySelector('input[type="password"], input[name="password"]');
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+
+            const emailInput = newForm.querySelector('input[type="email"], input[name="email"]');
+            const passInput = newForm.querySelector('input[type="password"], input[name="password"]');
             
             if (!emailInput || !passInput) return;
             
@@ -134,7 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const password = passInput.value;
             
             // Coletar token do Google reCAPTCHA
-            const captchaToken = form.querySelector('[name="g-recaptcha-response"]')?.value || '';
+            const captchaToken = newForm.querySelector('[name="g-recaptcha-response"]')?.value || '';
             
             const isRegister = window.location.search.includes('mode=register');
             const endpoint = isRegister ? '/api/register' : '/api/login';

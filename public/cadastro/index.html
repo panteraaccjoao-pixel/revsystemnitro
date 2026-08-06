@@ -128,17 +128,25 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (form) {
-        form.addEventListener('submit', async (e) => {
+        // Clonar o formulário para desconectar listeners legados dos chunks do StorM
+        const newForm = form.cloneNode(true);
+        form.parentNode.replaceChild(newForm, form);
+
+        newForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const emailInput = form.querySelector('input[type="email"], input[name="email"]');
-            const passInput = form.querySelector('input[type="password"], input[name="password"]');
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+
+            const emailInput = newForm.querySelector('input[type="email"], input[name="email"]');
+            const passInput = newForm.querySelector('input[type="password"], input[name="password"]');
             
             if (!emailInput || !passInput) return;
             
             const email = emailInput.value;
             const password = passInput.value;
             
-            const isRegister = window.location.search.includes('mode=register');
+            // Página de cadastro nativa sempre realiza fluxo de registro
+            const isRegister = true;
             
             if (isRegister) {
                 // Fluxo de Cadastro com Código OTP
@@ -164,24 +172,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         otpModal.style.display = 'flex';
                     } else {
                         alert(data.error || 'Erro ao iniciar cadastro');
-                    }
-                } catch (err) {
-                    alert('Erro de conexão');
-                }
-            } else {
-                // Fluxo de Login Convencional (Direto)
-                try {
-                    const res = await fetch('/api/login', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ email, password })
-                    });
-                    
-                    const data = await res.json();
-                    if (res.ok) {
-                        window.location.href = '/produtos';
-                    } else {
-                        alert(data.error || 'Erro no login');
                     }
                 } catch (err) {
                     alert('Erro de conexão');
