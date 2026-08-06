@@ -92,9 +92,12 @@ export async function POST(req: Request) {
           </div>
         </div>
       `,
-    });
-
-    console.log(`[Register] OTP ${code} sent to: ${email}`);
+      });
+      console.log(`[Register] OTP ${code} sent to: ${email}`);
+    } catch (emailError: any) {
+      console.error('[Register] Failed to send email via Resend:', emailError.message);
+      return NextResponse.json({ error: 'Falha ao enviar e-mail com o código de confirmação.' }, { status: 500 });
+    }
 
     return NextResponse.json({ otpRequired: true, email });
 
