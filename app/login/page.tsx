@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { Eye, EyeOff, Star } from "lucide-react"
+import { Eye, EyeOff, Star, ArrowLeft } from "lucide-react"
 
 declare global {
   interface Window {
@@ -124,9 +124,26 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-[#0a0a0a] flex flex-col">
       {/* ── Header ──────────────────────────────────────────────────────────── */}
-      <header className="px-8 py-5 flex items-center gap-3">
-        <Image src="/icon.png" alt="REV SYSTEM" width={32} height={32} className="rounded-md" />
-        <span className="text-white font-bold text-base tracking-wide">REV SYSTEM</span>
+      <header className="px-8 py-5 flex items-center gap-4">
+        {/* Botão Voltar — liquid glass */}
+        <Link
+          href="/"
+          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-sm font-medium text-white/80 hover:text-white transition-all duration-300"
+          style={{
+            background: "rgba(255,255,255,0.06)",
+            backdropFilter: "blur(16px) saturate(180%)",
+            WebkitBackdropFilter: "blur(16px) saturate(180%)",
+            border: "1px solid rgba(255,255,255,0.12)",
+            boxShadow: "0 4px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08)",
+          }}
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Voltar
+        </Link>
+        <div className="flex items-center gap-3 ml-auto">
+          <Image src="/icon.png" alt="REV SYSTEM" width={32} height={32} className="rounded-md" />
+          <span className="text-white font-bold text-base tracking-wide">REV SYSTEM</span>
+        </div>
       </header>
 
       {/* ── Main split layout ───────────────────────────────────────────────── */}
