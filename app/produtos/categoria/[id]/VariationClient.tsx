@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import { ChevronRight, Search, Minus, Plus, Zap, Check, Sparkles, ShoppingBag, ShieldCheck } from 'lucide-react';
+import { ChevronRight, Search, Minus, Plus, Zap, Check, Sparkles, ShoppingBag, ShieldCheck, ChevronLeft } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/lib/CartContext';
@@ -49,9 +49,24 @@ export default function VariationClient({ product }: { product: Product }) {
   };
 
   useEffect(() => {
-    // Trigger entrance animations after mount
     setIsLoaded(true);
   }, []);
+
+  // Banner auto-scroll
+  const banners = [
+    product.image || 'https://cdn.stormty.com/categories/1765778855151241293.webp',
+    'https://cdn.stormty.com/discord-uploads/1770832102251765553.png',
+    'https://cdn.stormty.com/discord-uploads/1770832138400822951.png',
+  ].filter(Boolean);
+  const [bannerIndex, setBannerIndex] = useState(0);
+
+  useEffect(() => {
+    if (banners.length <= 1) return;
+    const interval = setInterval(() => {
+      setBannerIndex(i => (i + 1) % banners.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [banners.length]);
 
   const variations = product.variations || [];
   
@@ -124,12 +139,17 @@ export default function VariationClient({ product }: { product: Product }) {
         @keyframes shimmer {
           100% { transform: translateX(100%); }
         }
+        @keyframes banner-slide {
+          from { opacity: 0; transform: scale(1.05); }
+          to { opacity: 1; transform: scale(1); }
+        }
         .animate-float { animation: float 6s ease-in-out infinite; }
         .stagger-1 { animation: fade-in-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
         .stagger-2 { animation: fade-in-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.1s forwards; opacity: 0; }
         .stagger-3 { animation: fade-in-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards; opacity: 0; }
         .stagger-4 { animation: fade-in-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.3s forwards; opacity: 0; }
         .animate-pulse-glow { animation: pulse-glow 3s infinite; }
+        .animate-banner { animation: banner-slide 0.6s ease-out forwards; }
         
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.02); border-radius: 4px; }
@@ -137,8 +157,57 @@ export default function VariationClient({ product }: { product: Product }) {
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(220, 38, 38, 0.6); }
       `}} />
 
+      {/* ── BANNER CAROUSEL ── */}
+      <div className={`relative w-full rounded-3xl overflow-hidden mb-10 lg:mb-14 shadow-[0_20px_60px_-15px_rgba(220,38,38,0.25)] border border-white/5 ${isLoaded ? 'stagger-1' : 'opacity-0'}`}>
+        {/* Slide */}
+        <div className="relative w-full h-52 md:h-72 lg:h-80">
+          {banners.map((src, i) => (
+            <img
+              key={i}
+              src={src}
+              alt={`Banner ${i + 1}`}
+              className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${i === bannerIndex ? 'opacity-100 animate-banner' : 'opacity-0'}`}
+            />
+          ))}
+          {/* Dark overlay for text readability */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent pointer-events-none" />
+          {/* Product name on banner */}
+          <div className="absolute bottom-6 left-6 right-16">
+            <div className="inline-flex items-center gap-2 bg-red-600/90 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest mb-2 shadow-lg">
+              <Zap className="w-3 h-3 fill-white" /> Entrega Automática
+            </div>
+            <h1 className="text-white font-black text-xl md:text-3xl drop-shadow-2xl leading-tight line-clamp-2">{product.name}</h1>
+          </div>
+        </div>
+
+        {/* Controls */}
+        <button
+          onClick={() => setBannerIndex(i => (i - 1 + banners.length) % banners.length)}
+          className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/50 border border-white/10 backdrop-blur-md flex items-center justify-center text-white hover:bg-black/70 transition-all"
+        >
+          <ChevronLeft className="w-5 h-5" />
+        </button>
+        <button
+          onClick={() => setBannerIndex(i => (i + 1) % banners.length)}
+          className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/50 border border-white/10 backdrop-blur-md flex items-center justify-center text-white hover:bg-black/70 transition-all"
+        >
+          <ChevronRight className="w-5 h-5" />
+        </button>
+
+        {/* Dots */}
+        <div className="absolute bottom-3 right-4 flex items-center gap-1.5">
+          {banners.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setBannerIndex(i)}
+              className={`rounded-full transition-all duration-300 ${i === bannerIndex ? 'w-5 h-1.5 bg-red-500' : 'w-1.5 h-1.5 bg-white/30'}`}
+            />
+          ))}
+        </div>
+      </div>
+
       {/* Breadcrumb - Stagger 1 */}
-      <nav className={`flex items-center space-x-2 text-sm text-muted-foreground mb-8 lg:mb-12 ml-3 ${isLoaded ? 'stagger-1' : 'opacity-0'}`}>
+      <nav className={`flex items-center space-x-2 text-sm text-muted-foreground mb-8 lg:mb-12 ml-3 ${isLoaded ? 'stagger-2' : 'opacity-0'}`}>
         <Link href="/" className="hover:text-red-500 hover:drop-shadow-[0_0_8px_rgba(239,68,68,0.8)] transition-all text-red-600 font-semibold tracking-wide flex items-center gap-2">
           <Sparkles className="w-4 h-4" /> Início
         </Link>

@@ -38,9 +38,15 @@ export default function AdminProducts() {
 
   useEffect(() => {
     const fetchProducts = async () => {
-      const { data, error } = await supabase.from('products').select('*').order('created_at', { ascending: false });
-      if (data && !error) {
-        setProducts(data);
+      try {
+        // Usa a rota admin com service role key para ignorar RLS
+        const res = await fetch('/api/admin/products', { cache: 'no-store' });
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data)) setProducts(data);
+        }
+      } catch (err) {
+        console.error('Erro ao carregar produtos:', err);
       }
       setIsLoaded(true);
     };
