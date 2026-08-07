@@ -41,12 +41,12 @@ export default function Produtos() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('Todos');
   const [dbProducts, setDbProducts] = useState<any[]>([]);
-  const [debugLog, setDebugLog] = useState<string>('Init...');
+  const [isLoading, setIsLoading] = useState(true);
   const { addToCart } = useCart();
 
   useEffect(() => {
     async function loadProducts() {
-      setDebugLog('Loading...');
+      setIsLoading(true);
       try {
         const { data, error } = await supabase
           .from('products')
@@ -55,14 +55,13 @@ export default function Produtos() {
           
         if (data && !error) {
           setDbProducts(data);
-          setDebugLog(`Success: ${data.length} products`);
         } else {
           console.error('Supabase error:', error);
-          setDebugLog(`Error: ${error?.message || JSON.stringify(error)}`);
         }
       } catch (err: any) {
         console.error('Error fetching database products:', err);
-        setDebugLog(`Catch Error: ${err?.message || 'Unknown'}`);
+      } finally {
+        setIsLoading(false);
       }
     }
     loadProducts();
@@ -183,6 +182,7 @@ export default function Produtos() {
                         <img 
                           src={item.image} 
                           alt={item.name} 
+                          loading="lazy"
                           className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
                         />
                       </div>
@@ -206,7 +206,29 @@ export default function Produtos() {
                 </div>
               </div>
             ))}
-            {filteredProducts.length === 0 && (
+            
+            {isLoading && (
+              <div className="space-y-6">
+                <div className="h-8 w-48 bg-white/5 rounded-lg animate-pulse mb-6"></div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
+                    <div key={i} className="bg-[#111111] rounded-2xl overflow-hidden flex flex-col h-[280px] animate-pulse border border-white/5">
+                      <div className="aspect-[16/10] bg-white/5 w-full"></div>
+                      <div className="p-5 flex flex-col flex-1 gap-4">
+                        <div className="h-4 bg-white/5 rounded w-3/4"></div>
+                        <div className="h-4 bg-white/5 rounded w-1/2"></div>
+                        <div className="flex items-center justify-between mt-auto">
+                          <div className="h-3 bg-white/5 rounded w-1/3"></div>
+                          <div className="h-6 bg-white/5 rounded-xl w-1/3"></div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {!isLoading && filteredProducts.length === 0 && (
               <div className="text-center py-20">
                 <p className="text-zinc-500">Nenhum produto encontrado.</p>
               </div>
