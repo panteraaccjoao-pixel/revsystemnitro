@@ -41,10 +41,12 @@ export default function Produtos() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('Todos');
   const [dbProducts, setDbProducts] = useState<any[]>([]);
+  const [debugLog, setDebugLog] = useState<string>('Init...');
   const { addToCart } = useCart();
 
   useEffect(() => {
     async function loadProducts() {
+      setDebugLog('Loading...');
       try {
         const { data, error } = await supabase
           .from('products')
@@ -53,11 +55,14 @@ export default function Produtos() {
           
         if (data && !error) {
           setDbProducts(data);
+          setDebugLog(`Success: ${data.length} products`);
         } else {
           console.error('Supabase error:', error);
+          setDebugLog(`Error: ${error?.message || JSON.stringify(error)}`);
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error('Error fetching database products:', err);
+        setDebugLog(`Catch Error: ${err?.message || 'Unknown'}`);
       }
     }
     loadProducts();
@@ -111,6 +116,10 @@ export default function Produtos() {
     <div className="min-h-screen bg-[#0a0a0a] text-white selection:bg-[#ff5533]/30 relative font-sans">
       <Header />
       <CartDrawer />
+
+      <div className="fixed bottom-4 left-4 bg-black/80 border border-[#ff5533]/50 text-[#ff5533] p-2 text-xs z-[100] rounded-md backdrop-blur-md font-mono max-w-xs break-words">
+        DEBUG: {debugLog}
+      </div>
 
       <main className="relative z-10 pt-28 pb-16">
         <section className="container mx-auto px-4 pt-8 pb-6">
