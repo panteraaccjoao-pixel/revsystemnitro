@@ -88,33 +88,57 @@ export default function AdminProducts() {
       variations: newProduct.variations
     };
 
-    if (editingProductId) {
-      const { data, error } = await supabase.from('products').update(productData).eq('id', editingProductId).select();
-      if (data && data.length > 0 && !error) {
-        setProducts(products.map(p => p.id === editingProductId ? data[0] : p));
+    try {
+      if (editingProductId) {
+        const res = await fetch('/api/admin/products', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'update', id: editingProductId, payload: productData })
+        });
+        const result = await res.json();
+        
+        if (res.ok && result.success && result.data) {
+          setProducts(products.map(p => p.id === editingProductId ? result.data : p));
+        } else {
+          throw new Error(result.error || "Nenhuma linha atualizada. Verifique a API.");
+        }
       } else {
-        console.error(error);
-        alert("Erro ao atualizar produto no banco: " + (error?.message || "Nenhuma linha atualizada. Verifique permissões RLS."));
+        const res = await fetch('/api/admin/products', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'insert', payload: productData })
+        });
+        const result = await res.json();
+        
+        if (res.ok && result.success && result.data) {
+          setProducts([result.data, ...products]); // add new product to the top
+        } else {
+          throw new Error(result.error || "Erro ao criar produto.");
+        }
       }
-    } else {
-      const { data, error } = await supabase.from('products').insert([productData]).select();
-      if (data && data.length > 0 && !error) {
-        setProducts([data[0], ...products]); // add new product to the top
-      } else {
-        console.error(error);
-        alert("Erro ao salvar produto no banco: " + (error?.message || JSON.stringify(error)));
-      }
+      setIsModalOpen(false);
+    } catch (err: any) {
+      console.error(err);
+      alert("Erro ao atualizar produto no banco: " + (err?.message || JSON.stringify(err)));
     }
-    setIsModalOpen(false);
   };
 
   const handleDeleteProduct = async (id: string) => {
     if (confirm("Tem certeza que deseja excluir este produto?")) {
-      const { error } = await supabase.from('products').delete().eq('id', id);
-      if (!error) {
-        setProducts(products.filter(p => p.id !== id));
-      } else {
-        alert("Erro ao excluir produto");
+      try {
+        const res = await fetch('/api/admin/products', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'delete', id })
+        });
+        const result = await res.json();
+        if (res.ok && result.success) {
+          setProducts(products.filter(p => p.id !== id));
+        } else {
+          throw new Error(result.error || "Erro na exclusão");
+        }
+      } catch (err: any) {
+        alert("Erro ao excluir produto: " + err.message);
       }
     }
   };
