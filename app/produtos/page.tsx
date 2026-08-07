@@ -117,10 +117,6 @@ export default function Produtos() {
       <Header />
       <CartDrawer />
 
-      <div className="fixed bottom-4 left-4 bg-black/80 border border-[#ff5533]/50 text-[#ff5533] p-2 text-xs z-[100] rounded-md backdrop-blur-md font-mono max-w-xs break-words">
-        DEBUG: {debugLog}
-      </div>
-
       <main className="relative z-10 pt-28 pb-16">
         <section className="container mx-auto px-4 pt-8 pb-6">
           <div className="mb-8">
