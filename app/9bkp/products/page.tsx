@@ -89,17 +89,17 @@ export default function AdminProducts() {
     };
 
     if (editingProductId) {
-      const { data, error } = await supabase.from('products').update(productData).eq('id', editingProductId).select().single();
-      if (data && !error) {
-        setProducts(products.map(p => p.id === editingProductId ? data : p));
+      const { data, error } = await supabase.from('products').update(productData).eq('id', editingProductId).select();
+      if (data && data.length > 0 && !error) {
+        setProducts(products.map(p => p.id === editingProductId ? data[0] : p));
       } else {
         console.error(error);
-        alert("Erro ao atualizar produto no banco: " + (error?.message || JSON.stringify(error)));
+        alert("Erro ao atualizar produto no banco: " + (error?.message || "Nenhuma linha atualizada. Verifique permissões RLS."));
       }
     } else {
-      const { data, error } = await supabase.from('products').insert([productData]).select().single();
-      if (data && !error) {
-        setProducts([data, ...products]); // add new product to the top
+      const { data, error } = await supabase.from('products').insert([productData]).select();
+      if (data && data.length > 0 && !error) {
+        setProducts([data[0], ...products]); // add new product to the top
       } else {
         console.error(error);
         alert("Erro ao salvar produto no banco: " + (error?.message || JSON.stringify(error)));
