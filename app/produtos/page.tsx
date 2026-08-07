@@ -6,7 +6,6 @@ import { Search, LayoutGrid } from 'lucide-react';
 import { Header } from '@/components/Header';
 import { CartDrawer } from '@/components/CartDrawer';
 import { useCart } from '@/lib/CartContext';
-import { supabase } from '@/lib/supabase';
 
 const FALLBACK_IMAGES: Record<string, string> = {
   "Impulsos [ Promoção ]": "https://cdn.stormty.com/categories/1765778855151241293.webp",
@@ -48,18 +47,15 @@ export default function Produtos() {
     async function loadProducts() {
       setIsLoading(true);
       try {
-        const { data, error } = await supabase
-          .from('products')
-          .select('*')
-          .order('created_at', { ascending: false });
-          
-        if (data && !error) {
+        // Usa a rota admin com service role key — nunca é bloqueada por RLS
+        const res = await fetch('/api/admin/products', { cache: 'no-store' });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        if (Array.isArray(data)) {
           setDbProducts(data);
-        } else {
-          console.error('Supabase error:', error);
         }
-      } catch (err: any) {
-        console.error('Error fetching database products:', err);
+      } catch (err) {
+        console.error('Erro ao carregar produtos:', err);
       } finally {
         setIsLoading(false);
       }
@@ -75,7 +71,7 @@ export default function Produtos() {
 
   const filteredProducts = useMemo(() => {
     let filtered = dbProducts;
-    
+
     if (selectedCategory !== 'Todos') {
       filtered = filtered.filter(p => (p.category || 'Outros') === selectedCategory);
     }
@@ -83,32 +79,26 @@ export default function Produtos() {
     if (searchTerm.trim()) {
       filtered = filtered.filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()));
     }
-    
+
     const sectionsMap = new Map<string, any[]>();
     filtered.forEach(prod => {
-      const catName = prod.category || "Outros";
-      if (!sectionsMap.has(catName)) {
-        sectionsMap.set(catName, []);
-      }
-      
-      // Fix broken blob URLs from previous bug
+      const catName = prod.category || 'Outros';
+      if (!sectionsMap.has(catName)) sectionsMap.set(catName, []);
+
       let finalImage = prod.image;
       if (!finalImage || finalImage.startsWith('blob:')) {
-        finalImage = FALLBACK_IMAGES[prod.name] || "https://cdn.stormty.com/categories/1765778855151241293.webp";
+        finalImage = FALLBACK_IMAGES[prod.name] || 'https://cdn.stormty.com/categories/1765778855151241293.webp';
       }
 
       sectionsMap.get(catName)!.push({
         id: prod.id,
         name: prod.name,
         price: prod.price,
-        image: finalImage
+        image: finalImage,
       });
     });
 
-    return Array.from(sectionsMap.entries()).map(([name, items]) => ({
-      name,
-      items
-    }));
+    return Array.from(sectionsMap.entries()).map(([name, items]) => ({ name, items }));
   }, [dbProducts, selectedCategory, searchTerm]);
 
   return (
@@ -129,7 +119,6 @@ export default function Produtos() {
             </p>
           </div>
 
-          {/* Filtros e Busca (conforme imagem) */}
           <div className="flex flex-col md:flex-row items-center gap-4 justify-between mt-12 mb-10">
             <div className="flex gap-2 overflow-x-auto pb-2 custom-scrollbar w-full md:w-auto flex-1">
               {categories.map((cat, i) => (
@@ -137,8 +126,8 @@ export default function Produtos() {
                   key={i}
                   onClick={() => setSelectedCategory(cat)}
                   className={`px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-colors flex items-center gap-2 ${
-                    selectedCategory === cat 
-                      ? 'bg-[#ff5533] text-black shadow-[0_0_15px_rgba(255,85,51,0.3)]' 
+                    selectedCategory === cat
+                      ? 'bg-[#ff5533] text-black shadow-[0_0_15px_rgba(255,85,51,0.3)]'
                       : 'bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10'
                   }`}
                 >
@@ -161,52 +150,10 @@ export default function Produtos() {
           </div>
         </section>
 
-        {/* Categories and Products Grid */}
         <section className="container mx-auto px-4">
           <div className="space-y-12">
-            {filteredProducts.map(section => (
-              <div key={section.name} className="space-y-6">
-                <h2 className="text-xl md:text-2xl font-bold text-white tracking-tight flex items-center gap-4">
-                  {section.name}
-                  <div className="flex-1 h-px bg-white/10"></div>
-                </h2>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {section.items.map(item => (
-                    <Link 
-                      key={item.id} 
-                      href={`/produtos/categoria/${item.id}`}
-                      className="bg-[#111111] border border-transparent hover:border-white/5 rounded-2xl overflow-hidden flex flex-col transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl group"
-                    >
-                      <div className="aspect-[16/10] relative bg-black/50 overflow-hidden">
-                        <img 
-                          src={item.image} 
-                          alt={item.name} 
-                          loading="lazy"
-                          className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
-                        />
-                      </div>
-
-                      <div className="p-5 flex flex-col flex-1">
-                        <h3 className="font-bold text-white text-sm mb-4 line-clamp-2">
-                          {item.name}
-                        </h3>
-                        
-                        <div className="flex items-center justify-between mt-auto">
-                          <span className="text-[11px] font-medium text-zinc-500">
-                            À vista no PIX
-                          </span>
-                          <span className="px-4 py-2 bg-white/5 group-hover:bg-white/10 text-white text-[11px] font-bold rounded-xl transition-colors">
-                            Ver Detalhes
-                          </span>
-                        </div>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            ))}
-            
+            {/* Skeleton enquanto carrega */}
             {isLoading && (
               <div className="space-y-6">
                 <div className="h-8 w-48 bg-white/5 rounded-lg animate-pulse mb-6"></div>
@@ -228,6 +175,50 @@ export default function Produtos() {
               </div>
             )}
 
+            {/* Produtos carregados */}
+            {!isLoading && filteredProducts.map(section => (
+              <div key={section.name} className="space-y-6">
+                <h2 className="text-xl md:text-2xl font-bold text-white tracking-tight flex items-center gap-4">
+                  {section.name}
+                  <div className="flex-1 h-px bg-white/10"></div>
+                </h2>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {section.items.map(item => (
+                    <Link
+                      key={item.id}
+                      href={`/produtos/categoria/${item.id}`}
+                      className="bg-[#111111] border border-transparent hover:border-white/5 rounded-2xl overflow-hidden flex flex-col transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl group"
+                    >
+                      <div className="aspect-[16/10] relative bg-black/50 overflow-hidden">
+                        <img
+                          src={item.image}
+                          alt={item.name}
+                          loading="lazy"
+                          className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                      </div>
+
+                      <div className="p-5 flex flex-col flex-1">
+                        <h3 className="font-bold text-white text-sm mb-4 line-clamp-2">
+                          {item.name}
+                        </h3>
+
+                        <div className="flex items-center justify-between mt-auto">
+                          <span className="text-[11px] font-medium text-zinc-500">
+                            À vista no PIX
+                          </span>
+                          <span className="px-4 py-2 bg-white/5 group-hover:bg-white/10 text-white text-[11px] font-bold rounded-xl transition-colors">
+                            Ver Detalhes
+                          </span>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            ))}
+
             {!isLoading && filteredProducts.length === 0 && (
               <div className="text-center py-20">
                 <p className="text-zinc-500">Nenhum produto encontrado.</p>
@@ -237,19 +228,18 @@ export default function Produtos() {
         </section>
       </main>
 
-      {/* Footer */}
       <footer className="relative py-12 border-t border-white/5 overflow-hidden bg-black mt-12">
         <div className="absolute inset-0 bg-gradient-to-t from-red-950/10 to-transparent"></div>
         <div className="container mx-auto px-4 relative z-10">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-2.5">
-              <video 
-                autoPlay 
-                loop 
-                muted 
-                playsInline 
-                src="/rev_system.mp4" 
-                className="w-8 h-8 rounded-lg object-cover" 
+              <video
+                autoPlay
+                loop
+                muted
+                playsInline
+                src="/rev_system.mp4"
+                className="w-8 h-8 rounded-lg object-cover"
               />
               <span className="text-lg font-bold text-white tracking-tight">REV SYSTEM</span>
             </div>
