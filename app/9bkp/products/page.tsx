@@ -323,7 +323,7 @@ export default function AdminProducts() {
               <span className="text-zinc-500 text-sm font-medium">Modo de Criação WYSIWYG</span>
             </div>
             <button onClick={handleSaveProduct} className="px-5 py-2 rounded-xl bg-[#ff5533] hover:bg-[#ff5533]/90 text-black font-bold text-sm flex items-center gap-2 shadow-[0_0_15px_rgba(255,85,51,0.3)] transition-colors">
-              <Save className="w-4 h-4" /> Finalizar Produto
+              <Save className="w-4 h-4" /> Salvar Alterações
             </button>
           </div>
 
