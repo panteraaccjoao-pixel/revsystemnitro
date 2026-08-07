@@ -178,16 +178,22 @@ export default function AdminProducts() {
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const url = URL.createObjectURL(file);
-      setNewProduct({ ...newProduct, image: url });
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setNewProduct({ ...newProduct, image: reader.result as string });
+      };
+      reader.readAsDataURL(file);
     }
   };
 
   const handleVariationIconUpload = (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const url = URL.createObjectURL(file);
-      updateVariation(index, 'icon', url);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        updateVariation(index, 'icon', reader.result as string);
+      };
+      reader.readAsDataURL(file);
     }
   };
 

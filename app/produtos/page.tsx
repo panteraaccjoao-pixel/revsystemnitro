@@ -7,6 +7,35 @@ import { Header } from '@/components/Header';
 import { CartDrawer } from '@/components/CartDrawer';
 import { useCart } from '@/lib/CartContext';
 
+const FALLBACK_IMAGES: Record<string, string> = {
+  "Impulsos [ Promoção ]": "https://cdn.stormty.com/categories/1765778855151241293.webp",
+  "Nitros [ Promoção ]": "https://cdn.stormty.com/categories/1765778841482941247.webp",
+  "Contas Discord": "https://cdn.stormty.com/categories/1765779530252063202.webp",
+  "Nitradas": "https://cdn.stormty.com/categories/1765779388710088687.webp",
+  "Combo Assinaturas": "https://cdn.stormty.com/discord-uploads/1770832102251765553.png",
+  "Netflix": "https://cdn.stormty.com/discord-uploads/1770832138400822951.png",
+  "Disney +": "https://cdn.stormty.com/discord-uploads/1770832199115049910.png",
+  "Amazon Prime": "https://cdn.stormty.com/discord-uploads/1770832326146491445.png",
+  "Hbo Max": "https://cdn.stormty.com/discord-uploads/1770832251718797897.png",
+  "Canva": "https://cdn.stormty.com/discord-uploads/1770832513391083855.png",
+  "Crunchyroll": "https://cdn.stormty.com/discord-uploads/1770832170479389596.png",
+  "Spotify Premium 3 Meses": "https://cdn.stormty.com/discord-uploads/1770832380568978006.png",
+  "Globo Play": "https://cdn.stormty.com/products/1771444746639536063.png",
+  "Youtube Premium": "https://cdn.stormty.com/products/1771684340737555584.png",
+  "Album da Copa 2026": "https://cdn.stormty.com/products/1778595537124813805.png",
+  "Método Nitro": "https://cdn.stormty.com/products/1778248308474679071.png",
+  "Internet Infinita": "https://cdn.stormty.com/discord-uploads/1770831898126854835.png",
+  "IFOOD POR 1 REAL": "https://cdn.stormty.com/products/1771685271488079216.png",
+  "Método MCDONALDS": "https://cdn.stormty.com/discord-uploads/1770831832297051193.png",
+  "Método Gift Card": "https://cdn.stormty.com/discord-uploads/1770831802622737824.png",
+  "Método Banir Instagram": "https://cdn.stormty.com/discord-uploads/1770831865018982210.png",
+  "PACK COM 1500 MÉTODOS": "https://cdn.stormty.com/products/1778249345274352906.jpg",
+  "OnlyFans e Privacy Eterno +18 ( Prazer Garantido )": "https://cdn.stormty.com/discord-uploads/1770832548626273462.png",
+  "Painel Consulta Dados": "https://cdn.stormty.com/discord-uploads/1770832605881926760.png",
+  "DIAMANTE GRATIS FREE FIRE": "https://cdn.stormty.com/products/1778247845890013583.png",
+  "Shopee Produtos Grátis!": "https://cdn.stormty.com/products/1778250549111250500.png"
+};
+
 export default function Produtos() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('Todos');
@@ -45,19 +74,24 @@ export default function Produtos() {
       filtered = filtered.filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()));
     }
     
-    // Agrupar novamente por categoria se for "Todos", ou apenas listar se for uma específica.
-    // Mas a imagem mostra os itens agrupados com o título da categoria acima deles.
     const sectionsMap = new Map<string, any[]>();
     filtered.forEach(prod => {
       const catName = prod.category || "Outros";
       if (!sectionsMap.has(catName)) {
         sectionsMap.set(catName, []);
       }
+      
+      // Fix broken blob URLs from previous bug
+      let finalImage = prod.image;
+      if (!finalImage || finalImage.startsWith('blob:')) {
+        finalImage = FALLBACK_IMAGES[prod.name] || "https://cdn.stormty.com/categories/1765778855151241293.webp";
+      }
+
       sectionsMap.get(catName)!.push({
         id: prod.id,
         name: prod.name,
         price: prod.price,
-        image: prod.image || "https://cdn.stormty.com/categories/1765778855151241293.webp"
+        image: finalImage
       });
     });
 
