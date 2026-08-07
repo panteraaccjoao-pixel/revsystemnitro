@@ -251,17 +251,47 @@ export default function Produtos() {
     });
   };
 
-  // Filtered sections and items based on search term
+  // Dynamic sections and items based on DB and search term
   const filteredSections = useMemo(() => {
-    if (!searchTerm.trim()) return CATALOG_SECTIONS;
+    // 1. Group DB products by category
+    const sectionsMap = new Map<string, any[]>();
     
-    return CATALOG_SECTIONS.map(section => {
+    // Use dbProducts to build the catalog dynamically
+    const sourceProducts = dbProducts.length > 0 ? dbProducts : [];
+    
+    sourceProducts.forEach(prod => {
+      const catName = prod.category || "Outros";
+      if (!sectionsMap.has(catName)) {
+        sectionsMap.set(catName, []);
+      }
+      sectionsMap.get(catName)!.push({
+        type: "product",
+        id: prod.id,
+        name: prod.name,
+        price: prod.price,
+        image: prod.image || "https://cdn.stormty.com/categories/1765778855151241293.webp"
+      });
+    });
+
+    // If DB is completely empty (loading or no products), fallback to empty array or we could fallback to CATALOG_SECTIONS, but user wants DB products to show.
+    let dynamicSections = Array.from(sectionsMap.entries()).map(([name, items]) => ({
+      name,
+      items
+    }));
+    
+    if (dynamicSections.length === 0) {
+      dynamicSections = CATALOG_SECTIONS; // Fallback to hardcoded just in case while loading
+    }
+
+    if (!searchTerm.trim()) return dynamicSections;
+    
+    return dynamicSections.map(section => {
       const filteredItems = section.items.filter(item => 
         item.name.toLowerCase().includes(searchTerm.toLowerCase())
       );
       return { ...section, items: filteredItems };
     }).filter(section => section.items.length > 0);
-  }, [searchTerm]);
+  }, [searchTerm, dbProducts]);
 
   return (
     <div className="min-h-screen bg-black text-white selection:bg-red-500/30 relative">
@@ -315,7 +345,9 @@ export default function Produtos() {
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5">
                   {section.items.map(item => {
                     const isProduct = item.type === 'product';
-                    const targetLink = getProductDbLink(item.name);
+                    const targetLink = (item as any).id 
+                      ? `/produtos/categoria/${(item as any).id}` 
+                      : getProductDbLink(item.name);
 
                     return (
                       <Link 
