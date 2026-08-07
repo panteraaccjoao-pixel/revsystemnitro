@@ -99,10 +99,6 @@ export function UserMenu() {
             {initials}
           </div>
         </div>
-        {/* Nome (oculto em mobile) */}
-        <span className="hidden md:block text-sm font-medium text-white/80 group-hover:text-white transition-colors max-w-[100px] truncate">
-          {user.name.split(" ")[0]}
-        </span>
         <ChevronDown
           className={`h-3.5 w-3.5 text-white/50 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
         />
@@ -160,7 +156,7 @@ export function UserMenu() {
               Membros VIP
             </Link>
             <a
-              href="https://discord.gg/revsystem"
+              href="https://discord.gg/CXYS4my5YX"
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => setOpen(false)}
