@@ -607,6 +607,15 @@ export default function AdminProducts() {
             </div>
             
           </div>
+          
+          {/* Floating Save Button */}
+          <button 
+            onClick={handleSaveProduct} 
+            className="fixed bottom-8 right-8 z-[60] px-6 py-4 rounded-full bg-[#ff5533] hover:bg-[#ff5533]/90 text-black font-extrabold text-sm flex items-center gap-2 shadow-[0_0_30px_rgba(255,85,51,0.5)] transition-all hover:scale-105"
+          >
+            <Save className="w-5 h-5" />
+            Salvar Alterações
+          </button>
         </div>
       )}
 
