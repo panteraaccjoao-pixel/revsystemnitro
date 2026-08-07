@@ -34,6 +34,7 @@ export default function AdminProducts() {
   const [pixInfo, setPixInfo] = useState<any>(null);
   const [products, setProducts] = useState<any[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [editingProductId, setEditingProductId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -75,7 +76,7 @@ export default function AdminProducts() {
 
   const [previewMode, setPreviewMode] = useState<"card" | "page">("page");
 
-  const handleCreateProduct = async () => {
+  const handleSaveProduct = async () => {
     const productData = {
       name: newProduct.name || "Novo Produto",
       price: `R$ ${newProduct.price}`,
@@ -87,24 +88,67 @@ export default function AdminProducts() {
       variations: newProduct.variations
     };
 
-    const { data, error } = await supabase.from('products').insert([productData]).select().single();
-    
-    if (data && !error) {
-      setProducts([data, ...products]); // add new product to the top
+    if (editingProductId) {
+      const { data, error } = await supabase.from('products').update(productData).eq('id', editingProductId).select().single();
+      if (data && !error) {
+        setProducts(products.map(p => p.id === editingProductId ? data : p));
+      } else {
+        console.error(error);
+        alert("Erro ao atualizar produto no banco: " + (error?.message || JSON.stringify(error)));
+      }
     } else {
-      console.error(error);
-      alert("Erro ao salvar produto no banco: " + (error?.message || JSON.stringify(error)));
+      const { data, error } = await supabase.from('products').insert([productData]).select().single();
+      if (data && !error) {
+        setProducts([data, ...products]); // add new product to the top
+      } else {
+        console.error(error);
+        alert("Erro ao salvar produto no banco: " + (error?.message || JSON.stringify(error)));
+      }
     }
     setIsModalOpen(false);
   };
 
   const handleDeleteProduct = async (id: string) => {
-    const { error } = await supabase.from('products').delete().eq('id', id);
-    if (!error) {
-      setProducts(products.filter(p => p.id !== id));
-    } else {
-      alert("Erro ao excluir produto");
+    if (confirm("Tem certeza que deseja excluir este produto?")) {
+      const { error } = await supabase.from('products').delete().eq('id', id);
+      if (!error) {
+        setProducts(products.filter(p => p.id !== id));
+      } else {
+        alert("Erro ao excluir produto");
+      }
     }
+  };
+
+  const handleEditProduct = (product: any) => {
+    setEditingProductId(product.id);
+    setNewProduct({
+      name: product.name,
+      price: product.price ? product.price.replace("R$ ", "") : "0,00",
+      stock: product.stock,
+      category: product.category,
+      image: product.image,
+      description: product.description,
+      hasVariations: product.has_variations,
+      variations: product.variations || [],
+      isAutoDelivery: product.is_auto_delivery || false
+    });
+    setIsModalOpen(true);
+  };
+
+  const handleOpenNewProduct = () => {
+    setEditingProductId(null);
+    setNewProduct({
+      name: "Novo Produto",
+      price: "0,00",
+      stock: 0,
+      category: selectedCategory !== "Todos" ? selectedCategory : categories[1] || "Sem Categoria",
+      image: "",
+      description: "",
+      hasVariations: false,
+      variations: [],
+      isAutoDelivery: true
+    });
+    setIsModalOpen(true);
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -196,7 +240,7 @@ export default function AdminProducts() {
           />
         </div>
         <button 
-          onClick={() => setIsModalOpen(true)}
+          onClick={handleOpenNewProduct}
           className="flex items-center gap-2 px-4 py-2 bg-[#ff3333] hover:bg-[#ff3333]/90 text-white font-medium rounded-xl transition-all shadow-[0_0_15px_rgba(255,51,51,0.3)]"
         >
           <Plus className="w-4 h-4" />
@@ -253,7 +297,7 @@ export default function AdminProducts() {
                 </td>
                 <td className="px-6 py-4 text-right">
                   <div className="flex items-center justify-end gap-2">
-                    <button className="p-2 hover:bg-white/10 rounded-lg text-zinc-400 transition-colors" title="Editar">
+                    <button onClick={() => handleEditProduct(product)} className="p-2 hover:bg-white/10 rounded-lg text-zinc-400 transition-colors" title="Editar">
                       <Edit2 className="w-4 h-4" />
                     </button>
                     <button onClick={() => handleDeleteProduct(product.id)} className="p-2 hover:bg-[#ff3333]/20 hover:text-[#ff3333] rounded-lg text-zinc-400 transition-colors" title="Excluir">
@@ -278,7 +322,7 @@ export default function AdminProducts() {
               </button>
               <span className="text-zinc-500 text-sm font-medium">Modo de Criação WYSIWYG</span>
             </div>
-            <button onClick={handleCreateProduct} className="px-5 py-2 rounded-xl bg-[#ff5533] hover:bg-[#ff5533]/90 text-black font-bold text-sm flex items-center gap-2 shadow-[0_0_15px_rgba(255,85,51,0.3)] transition-colors">
+            <button onClick={handleSaveProduct} className="px-5 py-2 rounded-xl bg-[#ff5533] hover:bg-[#ff5533]/90 text-black font-bold text-sm flex items-center gap-2 shadow-[0_0_15px_rgba(255,85,51,0.3)] transition-colors">
               <Save className="w-4 h-4" /> Finalizar Produto
             </button>
           </div>
