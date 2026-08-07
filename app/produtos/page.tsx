@@ -6,6 +6,7 @@ import { Search, LayoutGrid } from 'lucide-react';
 import { Header } from '@/components/Header';
 import { CartDrawer } from '@/components/CartDrawer';
 import { useCart } from '@/lib/CartContext';
+import { supabase } from '@/lib/supabase';
 
 const FALLBACK_IMAGES: Record<string, string> = {
   "Impulsos [ Promoção ]": "https://cdn.stormty.com/categories/1765778855151241293.webp",
@@ -45,10 +46,15 @@ export default function Produtos() {
   useEffect(() => {
     async function loadProducts() {
       try {
-        const res = await fetch('/api/products');
-        if (res.ok) {
-          const data = await res.json();
-          setDbProducts(data || []);
+        const { data, error } = await supabase
+          .from('products')
+          .select('*')
+          .order('created_at', { ascending: false });
+          
+        if (data && !error) {
+          setDbProducts(data);
+        } else {
+          console.error('Supabase error:', error);
         }
       } catch (err) {
         console.error('Error fetching database products:', err);
