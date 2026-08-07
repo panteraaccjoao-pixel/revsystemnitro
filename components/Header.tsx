@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { CartBadge } from '@/components/CartBadge';
+import { UserMenu } from '@/components/UserMenu';
 
 export function Header() {
   const pathname = usePathname();
@@ -56,14 +57,7 @@ export function Header() {
           {/* Right Actions */}
           <div className="flex items-center gap-5">
             <CartBadge />
-            <div className="flex items-center gap-4">
-              <Link href="/login" className="text-sm font-semibold text-gray-400 hover:text-white transition-colors">
-                Entrar
-              </Link>
-              <Link href="/register" className="inline-flex items-center justify-center rounded-xl bg-[#e60000] hover:bg-[#ff0000] text-white h-10 px-5 text-sm font-bold transition-all duration-300 shadow-[0_0_20px_rgba(230,0,0,0.3)] hover:shadow-[0_0_30px_rgba(255,0,0,0.5)] hover:scale-[1.02] active:scale-[0.98]">
-                Cadastro
-              </Link>
-            </div>
+            <UserMenu />
           </div>
         </div>
       </div>

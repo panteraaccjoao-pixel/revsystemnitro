@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 import { supabase } from '@/lib/supabase';
 
 const RECAPTCHA_SECRET_KEY = process.env.RECAPTCHA_SECRET_KEY || '';
@@ -52,11 +53,33 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
+    // Salvar tokens nos cookies para permitir verificação server-side via /api/me
+    const cookieStore = await cookies();
+    const maxAge = 60 * 60 * 24 * 7; // 7 dias
+    cookieStore.set('sb-access-token', data.session!.access_token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge,
+      path: '/',
+    });
+    cookieStore.set('sb-refresh-token', data.session!.refresh_token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge,
+      path: '/',
+    });
+
     // Retornar a sessão e dados de usuário
     return NextResponse.json({ 
       success: true, 
       session: data.session, 
-      user: data.user 
+      user: {
+        id: data.user.id,
+        email: data.user.email,
+        name: data.user.user_metadata?.full_name || data.user.email?.split('@')[0] || 'Usuário',
+      }
     });
 
   } catch (err: any) {
