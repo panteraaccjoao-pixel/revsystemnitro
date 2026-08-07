@@ -153,7 +153,7 @@ export function UserMenu() {
               className="flex items-center gap-3 px-4 py-2.5 text-sm text-zinc-300 hover:text-white hover:bg-white/5 transition-colors group"
             >
               <Crown className="h-4 w-4 text-zinc-500 group-hover:text-red-400 transition-colors" />
-              Membros VIP
+              Membros
             </Link>
             <a
               href="https://discord.gg/CXYS4my5YX"
