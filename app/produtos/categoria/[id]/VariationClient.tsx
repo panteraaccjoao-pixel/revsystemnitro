@@ -157,57 +157,8 @@ export default function VariationClient({ product }: { product: Product }) {
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(220, 38, 38, 0.6); }
       `}} />
 
-      {/* ── BANNER CAROUSEL ── */}
-      <div className={`relative w-full rounded-3xl overflow-hidden mb-10 lg:mb-14 shadow-[0_20px_60px_-15px_rgba(220,38,38,0.25)] border border-white/5 ${isLoaded ? 'stagger-1' : 'opacity-0'}`}>
-        {/* Slide */}
-        <div className="relative w-full h-52 md:h-72 lg:h-80">
-          {banners.map((src, i) => (
-            <img
-              key={i}
-              src={src}
-              alt={`Banner ${i + 1}`}
-              className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${i === bannerIndex ? 'opacity-100 animate-banner' : 'opacity-0'}`}
-            />
-          ))}
-          {/* Dark overlay for text readability */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent pointer-events-none" />
-          {/* Product name on banner */}
-          <div className="absolute bottom-6 left-6 right-16">
-            <div className="inline-flex items-center gap-2 bg-red-600/90 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest mb-2 shadow-lg">
-              <Zap className="w-3 h-3 fill-white" /> Entrega Automática
-            </div>
-            <h1 className="text-white font-black text-xl md:text-3xl drop-shadow-2xl leading-tight line-clamp-2">{product.name}</h1>
-          </div>
-        </div>
-
-        {/* Controls */}
-        <button
-          onClick={() => setBannerIndex(i => (i - 1 + banners.length) % banners.length)}
-          className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/50 border border-white/10 backdrop-blur-md flex items-center justify-center text-white hover:bg-black/70 transition-all"
-        >
-          <ChevronLeft className="w-5 h-5" />
-        </button>
-        <button
-          onClick={() => setBannerIndex(i => (i + 1) % banners.length)}
-          className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/50 border border-white/10 backdrop-blur-md flex items-center justify-center text-white hover:bg-black/70 transition-all"
-        >
-          <ChevronRight className="w-5 h-5" />
-        </button>
-
-        {/* Dots */}
-        <div className="absolute bottom-3 right-4 flex items-center gap-1.5">
-          {banners.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setBannerIndex(i)}
-              className={`rounded-full transition-all duration-300 ${i === bannerIndex ? 'w-5 h-1.5 bg-red-500' : 'w-1.5 h-1.5 bg-white/30'}`}
-            />
-          ))}
-        </div>
-      </div>
-
-      {/* Breadcrumb - Stagger 1 */}
-      <nav className={`flex items-center space-x-2 text-sm text-muted-foreground mb-8 lg:mb-12 ml-3 ${isLoaded ? 'stagger-2' : 'opacity-0'}`}>
+      {/* Breadcrumb */}
+      <nav className={`flex items-center space-x-2 text-sm text-muted-foreground mb-8 lg:mb-12 ml-3 ${isLoaded ? 'stagger-1' : 'opacity-0'}`}>
         <Link href="/" className="hover:text-red-500 hover:drop-shadow-[0_0_8px_rgba(239,68,68,0.8)] transition-all text-red-600 font-semibold tracking-wide flex items-center gap-2">
           <Sparkles className="w-4 h-4" /> Início
         </Link>
@@ -222,31 +173,38 @@ export default function VariationClient({ product }: { product: Product }) {
       {/* GIANT 3-COLUMN LAYOUT with ANIMATED STYLING */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 relative">
         
-        {/* Left: Giant Image Container (col-span-5) - Stagger 2 */}
+        {/* Left: Product Image (col-span-5) - Stagger 2 */}
         <div className={`lg:col-span-5 h-full ${isLoaded ? 'stagger-2' : 'opacity-0'}`}>
-          <div className="rounded-[2.5rem] overflow-hidden bg-white/[0.02] backdrop-blur-3xl border border-white/10 shadow-[0_20px_60px_-15px_rgba(220,38,38,0.2)] h-full min-h-[450px] relative flex flex-col items-center justify-center p-8 lg:p-12 text-center transition-all duration-700 hover:shadow-[0_30px_80px_-15px_rgba(220,38,38,0.4)] hover:bg-white/[0.04] hover:border-red-500/30 group">
-            
-            {/* Holographic Inner Glow */}
-            <div className="absolute inset-0 bg-gradient-to-tr from-red-600/10 via-transparent to-red-400/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
-            
-            {/* Subtle inner highlight for the glass edge */}
-            <div className="absolute inset-0 rounded-[2.5rem] pointer-events-none border border-white/10 [mask-image:linear-gradient(to_bottom,white,transparent)]"></div>
-            
-            {/* Pulsing Glow behind Zap */}
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(220,38,38,0.25),transparent_60%)] pointer-events-none"></div>
-            
-            {/* Floating content */}
-            <div className="relative z-10 flex flex-col items-center gap-4">
-              <div className="w-20 h-20 rounded-3xl bg-red-500/10 border border-red-500/20 flex items-center justify-center shadow-[0_0_30px_rgba(220,38,38,0.3)] animate-float mb-2">
-                <Zap className="w-10 h-10 text-red-500 animate-pulse drop-shadow-[0_0_15px_rgba(220,38,38,0.8)]" />
+          <div className="rounded-[2.5rem] overflow-hidden border border-white/10 shadow-[0_20px_60px_-15px_rgba(220,38,38,0.2)] h-full min-h-[450px] relative group transition-all duration-700 hover:shadow-[0_30px_80px_-15px_rgba(220,38,38,0.4)] hover:border-red-500/30">
+            {product.image ? (
+              <img
+                src={product.image}
+                alt={product.name}
+                className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+              />
+            ) : (
+              /* Fallback: Entrega Automática placeholder */
+              <div className="absolute inset-0 bg-white/[0.02] backdrop-blur-3xl flex flex-col items-center justify-center p-8 lg:p-12 text-center">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(220,38,38,0.25),transparent_60%)] pointer-events-none"></div>
+                <div className="relative z-10 flex flex-col items-center gap-4">
+                  <div className="w-20 h-20 rounded-3xl bg-red-500/10 border border-red-500/20 flex items-center justify-center shadow-[0_0_30px_rgba(220,38,38,0.3)] animate-float mb-2">
+                    <Zap className="w-10 h-10 text-red-500 animate-pulse drop-shadow-[0_0_15px_rgba(220,38,38,0.8)]" />
+                  </div>
+                  <h2 className="text-xl lg:text-2xl font-black text-white tracking-[0.15em] uppercase">Entrega Automática</h2>
+                  <div className="h-px w-24 bg-gradient-to-r from-transparent via-red-500 to-transparent my-1"></div>
+                  <p className="text-xs text-white/50 max-w-xs leading-relaxed font-semibold">
+                    Receba seu acesso imediatamente pelo chat após a confirmação do pagamento. Sistema 100% automatizado e seguro.
+                  </p>
+                </div>
               </div>
-              <h2 className="text-xl lg:text-2xl font-black text-white tracking-[0.15em] uppercase">
-                Entrega Automática
-              </h2>
-              <div className="h-px w-24 bg-gradient-to-r from-transparent via-red-500 to-transparent my-1"></div>
-              <p className="text-xs text-white/50 max-w-xs leading-relaxed font-semibold">
-                Receba seu acesso imediatamente pelo chat após a confirmação do pagamento. Sistema 100% automatizado e seguro.
-              </p>
+            )}
+            {/* Overlay escuro na base com nome do produto */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent pointer-events-none" />
+            <div className="absolute bottom-6 left-6 right-6">
+              <div className="inline-flex items-center gap-2 bg-red-600/90 backdrop-blur-sm text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest mb-2 shadow-lg">
+                <Zap className="w-3 h-3 fill-white" /> Entrega Automática
+              </div>
+              <h2 className="text-white font-black text-lg md:text-xl drop-shadow-2xl leading-tight line-clamp-2">{product.name}</h2>
             </div>
           </div>
         </div>
